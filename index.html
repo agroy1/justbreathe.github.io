@@ -5,231 +5,385 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Just Breathe</title>
   <style>
-    /* Reset and Base Styles */
+    /* ── Reset & Base ─────────────────────────────────────────────── */
     body, html {
-      margin: 0; padding: 0; 
-      height: 100%; height: 100dvh;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      height: 100dvh;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      overflow: hidden; 
+      overflow: hidden;
     }
 
     #app-container {
-      position: relative; width: 100vw; 
-      height: 100%; height: 100dvh;
+      position: relative;
+      width: 100vw;
+      height: 100%;
+      height: 100dvh;
       background-color: #2c3e50;
-      background-size: cover; background-position: center;
+      background-size: cover;
+      background-position: center;
       transition: background-image 1s ease-in-out;
     }
 
     #main-ui {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      z-index: 20; transition: opacity 0.5s; pointer-events: auto; 
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 20;
+      transition: opacity 0.5s;
+      pointer-events: auto;
     }
 
-    /* Shared Button Styles */
+    /* ── Shared Buttons ───────────────────────────────────────────── */
     .btn-base {
-      padding: 10px 20px; background: #D4E6F1; border: none; border-radius: 30px;
-      font-weight: bold; color: #333; cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.25); 
-      transition: scale 0.2s, background 0.2s; 
+      padding: 10px 20px;
+      background: #D4E6F1;
+      border: none;
+      border-radius: 30px;
+      font-weight: bold;
+      color: #333;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+      transition: transform 0.2s, background 0.2s; /* FIX: was 'scale', now 'transform' */
     }
-
-    .btn-base:hover { background: #fff; scale: 1.05; }
+    .btn-base:hover {
+      background: #fff;
+      transform: scale(1.05);
+    }
 
     #menu-btn {
-      position: absolute; top: 20px; right: 20px; font-size: 1rem; backdrop-filter: blur(5px);
+      position: absolute;
+      top: 20px; right: 20px;
+      font-size: 1rem;
+      backdrop-filter: blur(5px);
     }
 
     .action-btn {
-      position: absolute; 
-      bottom: max(30px, env(safe-area-inset-bottom)); 
-      left: 50%; transform: translateX(-50%);
-      padding: 15px 40px; font-size: 1.2rem; user-select: none; z-index: 30;
-      white-space: nowrap; max-width: 85vw; text-align: center;
+      position: absolute;
+      bottom: max(30px, env(safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 40px;
+      font-size: 1.2rem;
+      user-select: none;
+      z-index: 30;
+      white-space: nowrap;
+      max-width: 85vw;
+      text-align: center;
+    }
+    /* Override hover scale for action-btn since translateX is already applied */
+    .action-btn:hover {
+      transform: translateX(-50%) scale(1.05);
     }
 
     #stop-btn { display: none; }
 
-    /* Resume Overlay / Modal Styles */
+    /* ── Resume Overlay ───────────────────────────────────────────── */
     #resume-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); z-index: 200; display: none;
-      align-items: center; justify-content: center; backdrop-filter: blur(4px);
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
     }
-    
+
     .resume-modal {
-      background: #ffdc82; /* Matches the menu overlay */
-      padding: 30px 40px; border-radius: 16px;
-      text-align: center; color: black;
+      background: #ffdc82;
+      padding: 30px 40px;
+      border-radius: 16px;
+      text-align: center;
+      color: black;
       box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-      display: flex; flex-direction: column; gap: 15px; 
-      width: 85%; max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 85%;
+      max-width: 320px;
       border: 1px solid rgba(0,0,0,0.1);
     }
-    
+
     .resume-modal h2 { margin: 0; font-size: 1.4rem; color: black; }
-    .resume-modal p { margin: 0 0 10px 0; opacity: 0.9; font-size: 1rem; line-height: 1.4; color: black; }
-    
+    .resume-modal p  { margin: 0 0 10px 0; opacity: 0.9; font-size: 1rem; line-height: 1.4; color: black; }
+
     .resume-buttons { display: flex; flex-direction: column; gap: 12px; }
-    
-    /* Specific styling for the discard button to look elegant against the yellow */
-    #discard-btn { 
-      background: transparent; color: #a94442; border: 2px solid #a94442; box-shadow: none;
+
+    #discard-btn {
+      background: transparent;
+      color: #a94442;
+      border: 2px solid #a94442;
+      box-shadow: none;
     }
     #discard-btn:hover { background: #a94442; color: white; }
 
-    /* Overlay Menu Styles */
+    /* ── Menu Overlay ─────────────────────────────────────────────── */
     #menu-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: #ffdc82; z-index: 100; display: none; color: black;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #ffdc82;
+      z-index: 100;
+      display: none;
+      color: black;
     }
-    
+
     #close-menu-btn {
-      position: absolute; top: 20px; right: 30px;
-      font-size: 2.5rem; color: black; cursor: pointer; user-select: none;
-      transition: color 0.2s; z-index: 110;
+      position: absolute;
+      top: 20px; right: 30px;
+      font-size: 2.5rem;
+      color: black;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.2s;
+      z-index: 110;
     }
     #close-menu-btn:hover { color: #555; }
 
-    .menu-layout { display: flex; height: 100%; padding-top: 60px; box-sizing: border-box; }
-
-    /* Left Sidebar */
-    .sidebar { 
-      width: 250px; border-right: 1px solid rgba(0,0,0,0.2); 
-      display: flex; flex-direction: column; padding: 20px; 
+    .menu-layout {
+      display: flex;
+      height: 100%;
+      padding-top: 60px;
+      box-sizing: border-box;
     }
-    
-    /* Custom Scrollbar to ensure it stays visible on mobile */
-    .sidebar::-webkit-scrollbar { height: 6px; }
+
+    /* ── Sidebar ──────────────────────────────────────────────────── */
+    .sidebar {
+      width: 250px;
+      border-right: 1px solid rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .sidebar::-webkit-scrollbar       { height: 6px; }
     .sidebar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
-    .sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2);  border-radius: 10px; }
 
     .tab-btn {
-      background: none; border: none; padding: 15px; margin-bottom: 10px;
-      cursor: pointer; font-size: 1.2rem; font-weight: bold; color: black;
-      text-align: left; border-radius: 8px; transition: all 0.2s;
+      background: none;
+      border: none;
+      padding: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: black;
+      text-align: left;
+      border-radius: 8px;
+      transition: all 0.2s;
     }
-    .tab-btn:hover { background: rgba(0,0,0,0.05); color: black; }
+    .tab-btn:hover  { background: rgba(0,0,0,0.05); color: black; }
     .tab-btn.active { background: #D4E6F1; color: black; }
 
-    /* Right Content Area */
-    .content-area { 
-      flex: 1; 
-      padding: 40px; 
-      padding-bottom: 150px; /* Gives room to scroll the dropdown up */
-      overflow-y: auto; 
+    /* ── Content Area ─────────────────────────────────────────────── */
+    .content-area {
+      flex: 1;
+      padding: 40px;
+      padding-bottom: 150px;
+      overflow-y: auto;
     }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    
-    /* About Tab Typography */
-    .about-header { margin-top: 0; margin-bottom: 15px; color: black; }
-    .about-text { line-height: 1.6; color: black; margin-bottom: 30px; font-size: 1.05rem; }
-    .pattern-title { color: black; font-size: 1.1rem; font-weight: bold; }
-    .pattern-desc { margin: 8px 0 15px 20px; color: black; font-size: 0.95rem; line-height: 1.5; }
 
-    /* Background Select UI */
-    #bg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+    .tab-content        { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── About Tab ────────────────────────────────────────────────── */
+    .about-header  { margin-top: 0; margin-bottom: 15px; color: black; }
+    .about-text    { line-height: 1.6; color: black; margin-bottom: 30px; font-size: 1.05rem; }
+    .pattern-title { color: black; font-size: 1.1rem; font-weight: bold; }
+    .pattern-desc  { margin: 8px 0 15px 20px; color: black; font-size: 0.95rem; line-height: 1.5; }
+
+    /* ── Background Grid ──────────────────────────────────────────── */
+    #bg-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+    }
+
     .bg-card {
-      background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px;
-      display: flex; flex-direction: column; gap: 12px; align-items: center;
-      border: 1px solid rgba(0,0,0,0.1); transition: transform 0.2s;
+      background: rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid rgba(0,0,0,0.1);
+      transition: transform 0.2s;
     }
     .bg-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.1); }
-    .bg-card img { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; background: #444; }
-    
+    .bg-card img   { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; background: #444; }
+
     .bg-select-btn {
-      width: 100%; padding: 10px; border: 1px solid black; border-radius: 6px;
-      background: rgba(255,255,255,0.2); color: black; font-weight: bold; cursor: pointer; transition: 0.2s;
+      width: 100%;
+      padding: 10px;
+      border: 1px solid black;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.2);
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
     }
-    .bg-select-btn:hover { background: rgba(255,255,255,0.3); }
+    .bg-select-btn:hover    { background: rgba(255,255,255,0.3); }
     .bg-select-btn.selected { background: #D4E6F1; color: black; }
 
-    /* Pattern List UI */
-    .list-item { 
-      padding: 15px 20px; margin: 10px 0; background: rgba(255,255,255,0.05); border-radius: 8px; 
-      cursor: pointer; transition: all 0.2s; border: 1px solid rgba(0,0,0,0.1);
-      display: flex; justify-content: space-between; align-items: center; 
-      font-size: 1.1rem; color: black; flex-wrap: wrap; gap: 10px;
+    /* ── Pattern List ─────────────────────────────────────────────── */
+    .list-item {
+      padding: 15px 20px;
+      margin: 10px 0;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.1rem;
+      color: black;
+      flex-wrap: wrap;
+      gap: 10px;
     }
-    .list-item:hover { background: rgba(0,0,0,0.05); }
+    .list-item:hover    { background: rgba(0,0,0,0.05); }
     .list-item.selected { background: #D4E6F1; color: black; font-weight: bold; border-color: #D4E6F1; }
 
-    #settings-wrapper { display: flex; align-items: center; }
+    #settings-wrapper  { display: flex; align-items: center; }
     #duration-controls { display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
-    #sigh-text { display: none; font-size: 0.95rem; opacity: 1; font-weight: normal; }
-    
+    #sigh-text         { display: none; font-size: 0.95rem; font-weight: normal; }
+
     #duration-select {
-      padding: 6px 12px; border-radius: 6px; border: 1px solid black; font-size: 0.9rem;
-      font-family: inherit; background: white; cursor: pointer; color: black; outline: none; font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid black;
+      font-size: 0.9rem;
+      font-family: inherit;
+      background: white;
+      cursor: pointer;
+      color: black;
+      outline: none;
+      font-weight: bold;
     }
 
-    /* Timer & Canvas */
+    /* ── Timer & Canvas ───────────────────────────────────────────── */
     #timer-container {
-      position: absolute; top: 20px; left: 20px; z-index: 30;
-      background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px);
-      padding: 15px 20px; border-radius: 12px; color: white;
-      display: flex; flex-direction: column; gap: 8px; pointer-events: auto;
+      position: absolute;
+      top: 20px; left: 20px;
+      z-index: 30;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(5px);
+      padding: 15px 20px;
+      border-radius: 12px;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: auto;
     }
-    #timer-display { font-size: 2.5rem; font-weight: bold; font-variant-numeric: tabular-nums; text-align: center; line-height: 1; display: block; }
-    
+
+    #timer-display {
+      font-size: 2.5rem;
+      font-weight: bold;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+      line-height: 1;
+      display: block;
+    }
+
     #timer-adjust-controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 4px; }
+
     .time-btn {
-      background: rgba(255,255,255,0.2); border: none; border-radius: 6px;
-      color: white; padding: 5px 10px; cursor: pointer; font-size: 0.85rem; font-weight: bold;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: bold;
       transition: background 0.2s, opacity 0.2s;
     }
     .time-btn:hover:not(:disabled) { background: rgba(255,255,255,0.4); }
-    .time-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .time-btn:disabled             { opacity: 0.3; cursor: not-allowed; }
 
-    #timer-toggle-wrapper { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: #eee; margin: 0 auto; }
-    
-    /* Pattern Display anchored to the top right */
+    #timer-toggle-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #eee;
+      margin: 0 auto;
+    }
+
+    /* ── Pattern Display ──────────────────────────────────────────── */
     #pattern-display {
-      position: absolute; top: 20px; right: 20px;
-      color: white; font-size: 1.1rem; font-weight: bold; 
-      background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); padding: 10px 25px; border-radius: 30px; 
-      display: none; z-index: 50; border: 1px solid rgba(255,255,255,0.2); pointer-events: none;
-      text-align: center; white-space: nowrap;
+      position: absolute;
+      top: 20px; right: 20px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: bold;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(5px);
+      padding: 10px 25px;
+      border-radius: 30px;
+      display: none;
+      z-index: 50;
+      border: 1px solid rgba(255,255,255,0.2);
+      pointer-events: none;
+      text-align: center;
+      white-space: nowrap;
     }
 
     #breathCanvas {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      z-index: 10; opacity: 0; pointer-events: none; transition: opacity 1s ease-in;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s ease-in;
     }
 
-    /* Mobile Responsive Logic */
+    /* ── Responsive ───────────────────────────────────────────────── */
     @media (max-width: 768px) {
       .menu-layout { flex-direction: column; padding-top: 50px; }
-      .sidebar { 
-        width: 100%; border-right: none; border-bottom: 1px solid rgba(0,0,0,0.1); 
-        flex-direction: row; overflow-x: auto; padding: 10px 20px; gap: 10px; box-sizing: border-box;
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 10px 20px;
+        gap: 10px;
+        box-sizing: border-box;
       }
-      .tab-btn { padding: 10px 15px; margin-bottom: 0; white-space: nowrap; font-size: 1rem; }
-      .content-area { padding: 20px; padding-bottom: 150px; }
-      .about-header { font-size: 1.3rem; margin-bottom: 15px !important; }
+      .tab-btn        { padding: 10px 15px; margin-bottom: 0; white-space: nowrap; font-size: 1rem; }
+      .content-area   { padding: 20px; padding-bottom: 150px; }
+      .about-header   { font-size: 1.3rem; margin-bottom: 15px !important; }
       .about-text, .pattern-desc { font-size: 0.95rem; }
-      .list-item { font-size: 1rem; padding: 12px 15px; }
-      #bg-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+      .list-item      { font-size: 1rem; padding: 12px 15px; }
+      #bg-grid        { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
     }
 
     @media (max-width: 480px) {
-      #timer-container { 
-        top: 10px; left: 10px; padding: 10px 12px; 
-        max-width: 45%; box-sizing: border-box; 
-      }
-      #timer-display { font-size: 1.6rem; }
-      #menu-btn { top: 10px; right: 10px; padding: 8px 15px; font-size: 0.9rem; }
-      .action-btn { 
-        padding: 12px 30px; font-size: 1rem; 
-        bottom: max(20px, env(safe-area-inset-bottom)); 
-      }
-      #close-menu-btn { top: 10px; right: 20px; font-size: 2rem; }
-      
-      #pattern-display { 
-        top: 10px; right: 10px; font-size: 0.9rem; padding: 8px 12px; 
-        max-width: 48%; box-sizing: border-box; white-space: normal; 
-        line-height: 1.2; text-align: center;
+      #timer-container { top: 10px; left: 10px; padding: 10px 12px; max-width: 45%; box-sizing: border-box; }
+      #timer-display   { font-size: 1.6rem; }
+      #menu-btn        { top: 10px; right: 10px; padding: 8px 15px; font-size: 0.9rem; }
+      .action-btn      { padding: 12px 30px; font-size: 1rem; bottom: max(20px, env(safe-area-inset-bottom)); }
+      #close-menu-btn  { top: 10px; right: 20px; font-size: 2rem; }
+      #pattern-display {
+        top: 10px; right: 10px;
+        font-size: 0.9rem;
+        padding: 8px 12px;
+        max-width: 48%;
+        box-sizing: border-box;
+        white-space: normal;
+        line-height: 1.2;
+        text-align: center;
       }
     }
 
@@ -255,7 +409,7 @@
         <span id="timer-toggle-text">Show time</span>
       </label>
     </div>
-    
+
     <div id="main-ui">
       <button id="menu-btn" class="btn-base">Menu ☰</button>
       <button id="begin-btn" class="btn-base action-btn">Begin</button>
@@ -263,13 +417,14 @@
 
     <button id="stop-btn" class="btn-base action-btn">End Session</button>
   </div>
-  
+
+  <!-- Resume modal shown when a saved session is detected on load -->
   <div id="resume-overlay">
     <div class="resume-modal">
       <h2>Session Paused</h2>
       <p>You have an active breathwork session in progress.</p>
       <div class="resume-buttons">
-        <button id="resume-btn" class="btn-base" style="font-size: 1.05rem;">Resume</button>
+        <button id="resume-btn"  class="btn-base" style="font-size: 1.05rem;">Resume</button>
         <button id="discard-btn" class="btn-base" style="font-size: 1rem;">Discard</button>
       </div>
     </div>
@@ -278,22 +433,25 @@
   <div id="menu-overlay">
     <div id="close-menu-btn">&times;</div>
     <div class="menu-layout">
-      
+
       <div class="sidebar">
         <button class="tab-btn active" onclick="switchTab('bg-tab', this)">Backgrounds</button>
-        <button class="tab-btn" onclick="switchTab('pattern-tab', this)">Breathing Pattern</button>
-        <button class="tab-btn" onclick="switchTab('about-tab', this)">About</button>
+        <button class="tab-btn"        onclick="switchTab('pattern-tab', this)">Breathing Pattern</button>
+        <button class="tab-btn"        onclick="switchTab('about-tab', this)">About</button>
       </div>
 
       <div class="content-area">
+
+        <!-- Backgrounds -->
         <div id="bg-tab" class="tab-content active">
           <h2 class="about-header" style="margin-bottom: 25px;">Select your Background</h2>
           <div id="bg-grid"></div>
         </div>
 
+        <!-- Pattern selection -->
         <div id="pattern-tab" class="tab-content">
           <h2 class="about-header" style="margin-bottom: 25px;">Select a Breathing Pattern</h2>
-          
+
           <div class="list-item selected" id="pattern-box" onclick="selectPattern('box', this)">
             <span>Box Breathing</span>
             <span id="settings-wrapper">
@@ -311,10 +469,10 @@
               <span id="sigh-text">Set 3 cycles</span>
             </span>
           </div>
-          <div class="list-item" id="pattern-paced" onclick="selectPattern('paced', this)">
+          <div class="list-item" id="pattern-paced"   onclick="selectPattern('paced', this)">
             <span>Paced Breathing</span>
           </div>
-          <div class="list-item" id="pattern-sigh" onclick="selectPattern('sigh', this)">
+          <div class="list-item" id="pattern-sigh"    onclick="selectPattern('sigh', this)">
             <span>Physiological Sigh</span>
           </div>
           <div class="list-item" id="pattern-nostril" onclick="selectPattern('nostril', this)">
@@ -322,19 +480,24 @@
           </div>
         </div>
 
+        <!-- About -->
         <div id="about-tab" class="tab-content">
           <h2 class="about-header">Why Breathwork Matters</h2>
           <p class="about-text">
-            Breathwork is the active practice of consciously controlling your breathing rate and depth. It acts as a direct remote control for your autonomic nervous system. By intentionally changing how you breathe, you can actively reduce stress, lower your heart rate, improve focus, and signal your brain to enter a deep state of relaxation.
+            Breathwork is the active practice of consciously controlling your breathing rate and depth.
+            It acts as a direct remote control for your autonomic nervous system. By intentionally changing
+            how you breathe, you can actively reduce stress, lower your heart rate, improve focus, and
+            signal your brain to enter a deep state of relaxation.
           </p>
-          
+
           <h2 class="about-header">Breathing Patterns Explained</h2>
-          
+
           <div>
             <span class="pattern-title">Box Breathing</span>
             <p class="pattern-desc">
               <strong>Pattern:</strong> Inhale (4s) • Hold (4s) • Exhale (4s) • Hold (4s)<br>
-              <strong>Best for:</strong> Grounding, focus, and rapid stress reduction. Often used by first responders and athletes to clear the mind and steady the heart.
+              <strong>Best for:</strong> Grounding, focus, and rapid stress reduction. Often used by
+              first responders and athletes to clear the mind and steady the heart.
             </p>
           </div>
 
@@ -342,7 +505,8 @@
             <span class="pattern-title">Paced Breathing</span>
             <p class="pattern-desc">
               <strong>Pattern:</strong> Inhale (4s) • Hold (1s) • Exhale (6s) • Hold (1s)<br>
-              <strong>Best for:</strong> Deep relaxation and preparing for sleep. Extending the exhale longer than the inhale specifically triggers the parasympathetic "rest and digest" response.
+              <strong>Best for:</strong> Deep relaxation and preparing for sleep. Extending the exhale
+              longer than the inhale specifically triggers the parasympathetic "rest and digest" response.
             </p>
           </div>
 
@@ -350,7 +514,8 @@
             <span class="pattern-title">Physiological Sigh</span>
             <p class="pattern-desc">
               <strong>Pattern:</strong> Inhale (7s) • Hold (1s) • Top-off Inhale (2s) • Exhale (4s) • Hold (2.5s)<br>
-              <strong>Best for:</strong> Real-time anxiety relief. The "double inhale" reinflates collapsed alveoli (air sacs) in the lungs, allowing your body to efficiently offload built-up carbon dioxide.
+              <strong>Best for:</strong> Real-time anxiety relief. The "double inhale" reinflates collapsed
+              alveoli (air sacs) in the lungs, allowing your body to efficiently offload built-up carbon dioxide.
             </p>
           </div>
 
@@ -358,9 +523,18 @@
             <span class="pattern-title">Alternate Nostril</span>
             <p class="pattern-desc">
               <strong>Pattern:</strong> Inhale Left (4s) • Hold (4s) • Exhale Right (4s) • Hold (4s)<br>
-              <strong>Best for:</strong> Balancing energy and centering the mind. Traditionally used in yoga to harmonize the left and right hemispheres of the brain.
+              <strong>Best for:</strong> Balancing energy and centering the mind. Traditionally used in yoga
+              to harmonize the left and right hemispheres of the brain.
             </p>
           </div>
+
+          <h2 class="about-header" style="margin-top: 30px;">Timer Controls</h2>
+          <p class="about-text">
+            During a session, the <strong>+5 Min</strong> and <strong>−5 Min</strong> buttons let you
+            extend or shorten your remaining time on the fly. As a quick shortcut, pressing
+            <strong>+5 Min</strong> on the home screen (before starting) will immediately launch a
+            5-minute session with your currently selected pattern — handy for a fast drop-in breath.
+          </p>
         </div>
 
       </div>
@@ -368,7 +542,7 @@
   </div>
 
   <script>
-  // Global audio unlocker attached to app-container
+  // Tap anywhere to un-suspend the AudioContext on iOS / strict autoplay browsers
   function unlockAudio() {
     if (window.audioCtx && window.audioCtx.state === 'suspended') {
       window.audioCtx.resume();
@@ -376,87 +550,125 @@
   }
 
   (() => {
-    /* 1. CONFIGURATION, DOM & STATE */
-    const imageFiles = ['lake.webp', 'mountains.jpg', 'sky.webp', 'mt_fuji.jpg', 'mt_fuji_with_galaxy.jpg'];
-    
-    const DOM = {
-      app: document.getElementById('app-container'),
-      canvas: document.getElementById('breathCanvas'),
-      ctx: document.getElementById('breathCanvas').getContext('2d'),
-      menuBtn: document.getElementById('menu-btn'),
-      closeMenuBtn: document.getElementById('close-menu-btn'),
-      menuOverlay: document.getElementById('menu-overlay'),
-      resumeOverlay: document.getElementById('resume-overlay'),
-      resumeBtn: document.getElementById('resume-btn'),
-      discardBtn: document.getElementById('discard-btn'),
-      beginBtn: document.getElementById('begin-btn'),
-      stopBtn: document.getElementById('stop-btn'),
-      mainUi: document.getElementById('main-ui'),
-      bgGrid: document.getElementById('bg-grid'),
-      patternDisplay: document.getElementById('pattern-display'),
-      timerDisplay: document.getElementById('timer-display'),
-      timerToggle: document.getElementById('timer-toggle'),
-      timerToggleText: document.getElementById('timer-toggle-text'),
-      timerAdjustControls: document.getElementById('timer-adjust-controls'),
-      addTimeBtn: document.getElementById('add-time-btn'),
-      subTimeBtn: document.getElementById('sub-time-btn'),
-      durationSelect: document.getElementById('duration-select'),
-      settingsWrapper: document.getElementById('settings-wrapper'),
-      durationControls: document.getElementById('duration-controls'),
-      sighText: document.getElementById('sigh-text')
+    /* ── 1. CONFIGURATION ─────────────────────────────────────────── */
+    const IMAGE_FILES = ['lake.webp', 'mountains.jpg', 'sky.webp', 'mt_fuji.jpg', 'mt_fuji_with_galaxy.jpg'];
+
+    const PATTERN_NAMES = {
+      box:     'Box Breathing',
+      paced:   'Paced Breathing',
+      sigh:    'Physiological Sigh',
+      nostril: 'Alternate Nostril'
     };
 
-    const patternDefs = {
-      box: [{ label: 'Inhale', duration: 4, startY: 1, endY: 0 }, { label: 'Hold', duration: 4, startY: 0, endY: 0 }, { label: 'Exhale', duration: 4, startY: 0, endY: 1 }, { label: 'Hold', duration: 4, startY: 1, endY: 1 }],
-      paced: [{ label: 'Inhale', duration: 4, startY: 1, endY: 0 }, { label: 'Hold', duration: 1, startY: 0, endY: 0 }, { label: 'Exhale', duration: 6, startY: 0, endY: 1 }, { label: 'Hold', duration: 1, startY: 1, endY: 1 }],
-      sigh: [{ label: 'Inhale', duration: 7, startY: 1, endY: 0.2 }, { label: 'Hold', duration: 1, startY: 0.2, endY: 0.2 }, { label: 'Top-off Inhale', duration: 2, startY: 0.2, endY: 0 }, { label: 'Exhale', duration: 4, startY: 0, endY: 1 }, { label: 'Hold', duration: 2.5, startY: 1, endY: 1 }],
-      nostril: [{ label: 'Inhale (Left)', duration: 4, startY: 1, endY: 0 }, { label: 'Hold', duration: 4, startY: 0, endY: 0 }, { label: 'Exhale (Right)', duration: 4, startY: 0, endY: 1 }, { label: 'Hold', duration: 4, startY: 1, endY: 1 }]
+    // Each phase: label, duration (s), startY / endY (0 = top/inhale, 1 = bottom/exhale)
+    const PATTERN_DEFS = {
+      box: [
+        { label: 'Inhale',  duration: 4,   startY: 1, endY: 0 },
+        { label: 'Hold',    duration: 4,   startY: 0, endY: 0 },
+        { label: 'Exhale',  duration: 4,   startY: 0, endY: 1 },
+        { label: 'Hold',    duration: 4,   startY: 1, endY: 1 }
+      ],
+      paced: [
+        { label: 'Inhale',  duration: 4,   startY: 1, endY: 0 },
+        { label: 'Hold',    duration: 1,   startY: 0, endY: 0 },
+        { label: 'Exhale',  duration: 6,   startY: 0, endY: 1 },
+        { label: 'Hold',    duration: 1,   startY: 1, endY: 1 }
+      ],
+      sigh: [
+        { label: 'Inhale',         duration: 7,   startY: 1,   endY: 0.2 },
+        { label: 'Hold',           duration: 1,   startY: 0.2, endY: 0.2 },
+        { label: 'Top-off Inhale', duration: 2,   startY: 0.2, endY: 0   },
+        { label: 'Exhale',         duration: 4,   startY: 0,   endY: 1   },
+        { label: 'Hold',           duration: 2.5, startY: 1,   endY: 1   }
+      ],
+      nostril: [
+        { label: 'Inhale (Left)',  duration: 4, startY: 1, endY: 0 },
+        { label: 'Hold',           duration: 4, startY: 0, endY: 0 },
+        { label: 'Exhale (Right)', duration: 4, startY: 0, endY: 1 },
+        { label: 'Hold',           duration: 4, startY: 1, endY: 1 }
+      ]
     };
 
-    const patternDurations = {};
-    for (const key in patternDefs) {
-      patternDurations[key] = patternDefs[key].reduce((sum, p) => sum + p.duration, 0);
+    // Pre-compute total cycle durations
+    const PATTERN_DURATIONS = {};
+    for (const key in PATTERN_DEFS) {
+      PATTERN_DURATIONS[key] = PATTERN_DEFS[key].reduce((sum, p) => sum + p.duration, 0);
     }
 
+    /* ── 2. DOM REFERENCES ────────────────────────────────────────── */
+    const DOM = {
+      app:                 document.getElementById('app-container'),
+      canvas:              document.getElementById('breathCanvas'),
+      ctx:                 document.getElementById('breathCanvas').getContext('2d'),
+      menuBtn:             document.getElementById('menu-btn'),
+      closeMenuBtn:        document.getElementById('close-menu-btn'),
+      menuOverlay:         document.getElementById('menu-overlay'),
+      resumeOverlay:       document.getElementById('resume-overlay'),
+      resumeBtn:           document.getElementById('resume-btn'),
+      discardBtn:          document.getElementById('discard-btn'),
+      beginBtn:            document.getElementById('begin-btn'),
+      stopBtn:             document.getElementById('stop-btn'),
+      mainUi:              document.getElementById('main-ui'),
+      bgGrid:              document.getElementById('bg-grid'),
+      patternDisplay:      document.getElementById('pattern-display'),
+      timerDisplay:        document.getElementById('timer-display'),
+      timerToggle:         document.getElementById('timer-toggle'),
+      timerToggleText:     document.getElementById('timer-toggle-text'),
+      timerAdjustControls: document.getElementById('timer-adjust-controls'),
+      addTimeBtn:          document.getElementById('add-time-btn'),
+      subTimeBtn:          document.getElementById('sub-time-btn'),
+      durationSelect:      document.getElementById('duration-select'),
+      settingsWrapper:     document.getElementById('settings-wrapper'),
+      durationControls:    document.getElementById('duration-controls'),
+      sighText:            document.getElementById('sigh-text')
+    };
+
+    /* ── 3. STATE ─────────────────────────────────────────────────── */
     let state = {
-      selectedBackground: '',
-      selectedPattern: 'box',
-      sessionStartTime: 0,
-      isRunning: false,
-      isStopping: false,
-      targetEndTimeMs: 0,
+      selectedBackground:  '',
+      selectedPattern:     'box',
+      sessionStartTime:    0,
+      isRunning:           false,
+      isStopping:          false,
+      targetEndTimeMs:     0,
       sighCyclesCompleted: 0,
-      lastCycleIndex: 0,
-      currentPhaseLabel: ''
+      lastCycleIndex:      0,
+      currentPhaseLabel:   ''
     };
 
     let animationFrameId, backgroundTimerId, currentOscillator = null;
-    window.audioCtx = null; // Exposed to window for the onclick un-suspender
+    window.audioCtx = null;
 
-    /* 2. PERSISTENCE ENGINE (Menu Settings + Active Session) */
+    /* ── 4. PERSISTENCE ───────────────────────────────────────────── */
+
+    /** Saves UI preferences (pattern, duration, timer visibility) to localStorage. */
     function saveSettings() {
       localStorage.setItem('breathwork_timer_visible', DOM.timerToggle.checked);
-      localStorage.setItem('breathwork_pattern', state.selectedPattern);
-      localStorage.setItem('breathwork_duration', DOM.durationSelect.value);
+      localStorage.setItem('breathwork_pattern',       state.selectedPattern);
+      localStorage.setItem('breathwork_duration',      DOM.durationSelect.value);
     }
 
+    /**
+     * Saves the full runtime session to localStorage so it can be resumed
+     * after a page reload or app switch.
+     */
     function saveSessionState() {
       const sessionData = {
-        isRunning: state.isRunning,
-        isStopping: state.isStopping,
-        sessionStartTime: state.sessionStartTime,
-        targetEndTimeMs: state.targetEndTimeMs,
+        isRunning:           state.isRunning,
+        isStopping:          state.isStopping,
+        sessionStartTime:    state.sessionStartTime,
+        targetEndTimeMs:     state.targetEndTimeMs,
         sighCyclesCompleted: state.sighCyclesCompleted,
-        lastCycleIndex: state.lastCycleIndex
+        lastCycleIndex:      state.lastCycleIndex,
+        selectedPattern:     state.selectedPattern   // FIX: persisted so resume uses the correct pattern
       };
       localStorage.setItem('breathwork_active_session', JSON.stringify(sessionData));
     }
 
+    /** Restores UI preferences on startup. */
     function loadSettings() {
       const savedDuration = localStorage.getItem('breathwork_duration');
-      if (savedDuration) {
-        DOM.durationSelect.value = savedDuration;
-      }
+      if (savedDuration) DOM.durationSelect.value = savedDuration;
 
       const timerVis = localStorage.getItem('breathwork_timer_visible');
       if (timerVis !== null) {
@@ -465,7 +677,7 @@
       }
 
       const savedPattern = localStorage.getItem('breathwork_pattern');
-      if (savedPattern && patternDefs[savedPattern]) {
+      if (savedPattern && PATTERN_DEFS[savedPattern]) {
         const patternEl = document.getElementById(`pattern-${savedPattern}`);
         if (patternEl) window.selectPattern(savedPattern, patternEl);
       } else {
@@ -473,6 +685,10 @@
       }
     }
 
+    /**
+     * On load, checks localStorage for an interrupted session. If found and still
+     * valid (time remaining), shows the Resume modal; otherwise cleans up.
+     */
     function loadActiveSession() {
       const saved = localStorage.getItem('breathwork_active_session');
       if (!saved) return;
@@ -480,70 +696,74 @@
         const data = JSON.parse(saved);
         if (data.isRunning) {
           if (state.selectedPattern !== 'sigh' && data.targetEndTimeMs <= Date.now()) {
+            // Session would have already ended — discard silently
             executeStop();
           } else {
             Object.assign(state, data);
-            
-            // Calculate and display the remaining time so it isn't "00:00"
-            let remainingMs = state.targetEndTimeMs - Date.now();
+
+            // Show the remaining time so the display isn't "00:00"
+            const remainingMs = state.targetEndTimeMs - Date.now();
             DOM.timerDisplay.innerText = formatTime(Math.max(0, Math.ceil(remainingMs / 1000)));
-            
-            // Display the modal instead of resuming immediately
+
             DOM.resumeOverlay.style.display = 'flex';
           }
         }
-      } catch (e) { console.error("Failed to parse session state"); }
+      } catch (e) {
+        console.error('Failed to parse session state', e);
+      }
     }
-    /* 3. AUDIO LOGIC */
+
+    /* ── 5. AUDIO ─────────────────────────────────────────────────── */
+
+    /** Plays a short sine-wave tone for inhale (420 Hz) or exhale (326 Hz) phases. */
     function playTone(phaseLabel, duration) {
       if (!window.audioCtx) return;
       if (currentOscillator) { try { currentOscillator.stop(); } catch(e) {} }
       if (phaseLabel.includes('Hold')) return;
 
       const oscillator = window.audioCtx.createOscillator();
-      const gainNode = window.audioCtx.createGain();
+      const gainNode   = window.audioCtx.createGain();
       currentOscillator = oscillator;
 
       oscillator.connect(gainNode);
       gainNode.connect(window.audioCtx.destination);
       oscillator.type = 'sine';
 
-      if (phaseLabel.includes('Inhale')) oscillator.frequency.setValueAtTime(420, window.audioCtx.currentTime); 
-      else if (phaseLabel.includes('Exhale')) oscillator.frequency.setValueAtTime(326, window.audioCtx.currentTime); 
+      const freq = phaseLabel.includes('Inhale') ? 420 : 326;
+      oscillator.frequency.setValueAtTime(freq, window.audioCtx.currentTime);
 
       const fadeTime = Math.min(0.5, duration * 0.2);
-      gainNode.gain.setValueAtTime(0, window.audioCtx.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.1, window.audioCtx.currentTime + fadeTime); 
-      gainNode.gain.linearRampToValueAtTime(0.1, window.audioCtx.currentTime + duration - fadeTime); 
-      gainNode.gain.linearRampToValueAtTime(0, window.audioCtx.currentTime + duration); 
+      gainNode.gain.setValueAtTime(0,    window.audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, window.audioCtx.currentTime + fadeTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, window.audioCtx.currentTime + duration - fadeTime);
+      gainNode.gain.linearRampToValueAtTime(0,   window.audioCtx.currentTime + duration);
 
       oscillator.start(window.audioCtx.currentTime);
       oscillator.stop(window.audioCtx.currentTime + duration);
     }
 
-    /* 4. UI, MENU & INITIALIZATION LOGIC */
+    /* ── 6. UI & MENU ─────────────────────────────────────────────── */
+
     window.onload = () => {
       populateBackgroundList();
-      
+
       const savedBg = localStorage.getItem('breathwork_bg');
-      setBackground((savedBg && imageFiles.includes(savedBg)) ? savedBg : (imageFiles[0] || ''));
-      
-      loadSettings(); 
+      setBackground((savedBg && IMAGE_FILES.includes(savedBg)) ? savedBg : (IMAGE_FILES[0] || ''));
+
+      loadSettings();
       resizeCanvas();
-      
       window.addEventListener('resize', resizeCanvas);
-      
       loadActiveSession();
     };
 
-    DOM.menuBtn.addEventListener('click', () => DOM.menuOverlay.style.display = 'block');
-    DOM.closeMenuBtn.addEventListener('click', () => DOM.menuOverlay.style.display = 'none');
-    
+    DOM.menuBtn.addEventListener('click',      () => { DOM.menuOverlay.style.display = 'block'; });
+    DOM.closeMenuBtn.addEventListener('click', () => { DOM.menuOverlay.style.display = 'none';  });
+
     DOM.resumeBtn.addEventListener('click', () => {
       DOM.resumeOverlay.style.display = 'none';
       resumeSession();
     });
-    
+
     DOM.discardBtn.addEventListener('click', () => {
       DOM.resumeOverlay.style.display = 'none';
       executeStop();
@@ -554,7 +774,7 @@
       state.selectedBackground = filename;
       DOM.app.style.backgroundImage = `url('images/${filename}')`;
       localStorage.setItem('breathwork_bg', filename);
-      
+
       document.querySelectorAll('.bg-select-btn').forEach(btn => {
         const isMatch = btn.dataset.filename === filename;
         btn.classList.toggle('selected', isMatch);
@@ -563,21 +783,22 @@
     }
 
     function populateBackgroundList() {
-      imageFiles.forEach(filename => {
-        const card = document.createElement('div');
+      IMAGE_FILES.forEach(filename => {
+        const card  = document.createElement('div');
         card.className = 'bg-card';
-        
-        const img = document.createElement('img');
-        img.src = `images/${filename}`; img.alt = filename;
+
+        const img   = document.createElement('img');
+        img.src     = `images/${filename}`;
+        img.alt     = filename;
 
         const title = document.createElement('div');
-        title.innerText = filename.split('.')[0].replace('_', ' ').toUpperCase();
+        title.innerText      = filename;
         title.style.fontWeight = 'bold';
-        
-        const btn = document.createElement('button');
-        btn.className = 'bg-select-btn';
+
+        const btn   = document.createElement('button');
+        btn.className        = 'bg-select-btn';
         btn.dataset.filename = filename;
-        btn.onclick = () => setBackground(filename);
+        btn.onclick          = () => setBackground(filename);
 
         card.append(img, title, btn);
         DOM.bgGrid.appendChild(card);
@@ -598,13 +819,13 @@
       element.appendChild(DOM.settingsWrapper);
 
       const isSigh = (patternId === 'sigh');
-      DOM.durationControls.style.display = isSigh ? 'none' : 'inline-flex';
-      DOM.sighText.style.display = isSigh ? 'inline-block' : 'none';
-      
+      DOM.durationControls.style.display = isSigh ? 'none'         : 'inline-flex';
+      DOM.sighText.style.display          = isSigh ? 'inline-block' : 'none';
+
       updateIdleTimerDisplay();
       saveSettings();
     };
-    
+
     DOM.durationSelect.addEventListener('change', () => {
       updateIdleTimerDisplay();
       saveSettings();
@@ -612,16 +833,16 @@
 
     function updateIdleTimerDisplay() {
       if (state.isRunning) return;
-      DOM.timerDisplay.innerText = '00:00'; 
-      DOM.addTimeBtn.disabled = (state.selectedPattern === 'sigh');
-      DOM.subTimeBtn.disabled = true; 
+      DOM.timerDisplay.innerText  = '00:00';
+      DOM.addTimeBtn.disabled     = (state.selectedPattern === 'sigh');
+      DOM.subTimeBtn.disabled     = true;
     }
 
     function applyTimerVisibility() {
-      const isChecked = DOM.timerToggle.checked;
-      DOM.timerDisplay.style.display = isChecked ? 'block' : 'none';
-      DOM.timerAdjustControls.style.display = isChecked ? 'flex' : 'none';
-      DOM.timerToggleText.innerText = isChecked ? 'Show time' : 'Show time';
+      const show = DOM.timerToggle.checked;
+      DOM.timerDisplay.style.display        = show ? 'block' : 'none';
+      DOM.timerAdjustControls.style.display = show ? 'flex'  : 'none';
+      // Label intentionally stays "Show time" regardless of state
     }
 
     DOM.timerToggle.addEventListener('change', () => {
@@ -629,171 +850,212 @@
       saveSettings();
     });
 
-    /* TIME ADJUSTMENT LISTENERS */
+    /* ── 7. TIME ADJUSTMENT ───────────────────────────────────────── */
+
+    /**
+     * +5 Min button:
+     *   • During a session  → adds 5 minutes to the remaining time.
+     *   • On the home screen (idle) → SHORTCUT: immediately starts a 5-minute session
+     *     with the current pattern. Sigh pattern is excluded (it has a fixed 3-cycle duration).
+     *     This is an intentional quick-launch hack for a fast drop-in breath.
+     */
     DOM.addTimeBtn.addEventListener('click', () => {
-      if (!state.isRunning) return (state.selectedPattern !== 'sigh') && startSession(5);
+      if (!state.isRunning) {
+        if (state.selectedPattern !== 'sigh') startSession(5);
+        return;
+      }
       state.targetEndTimeMs += 5 * 60 * 1000;
       saveSessionState();
-      updateLogic(); 
+      updateLogic();
     });
 
     DOM.subTimeBtn.addEventListener('click', () => {
       if (!state.isRunning) return;
       state.targetEndTimeMs -= 5 * 60 * 1000;
       saveSessionState();
-      updateLogic(); 
+      updateLogic();
     });
 
-    /* 5. CORE ENGINE */
-    function resizeCanvas() { DOM.canvas.width = window.innerWidth; DOM.canvas.height = window.innerHeight; }
+    /* ── 8. CORE ENGINE ───────────────────────────────────────────── */
 
+    function resizeCanvas() {
+      DOM.canvas.width  = window.innerWidth;
+      DOM.canvas.height = window.innerHeight;
+    }
+
+    /** Returns interpolated Y position and phase metadata for a given time offset. */
     function getStateAtTime(timeSec, patternId) {
-      const cycle = patternDefs[patternId];
-      let t = Math.max(0, timeSec) % patternDurations[patternId];
-      
-      for (let phase of cycle) {
+      const cycle = PATTERN_DEFS[patternId];
+      let t = Math.max(0, timeSec) % PATTERN_DURATIONS[patternId];
+
+      for (const phase of cycle) {
         if (t < phase.duration) {
-          let progress = t / phase.duration; 
-          return { y: phase.startY + (phase.endY - phase.startY) * progress, label: phase.label, duration: phase.duration }; 
+          const progress = t / phase.duration;
+          return {
+            y:        phase.startY + (phase.endY - phase.startY) * progress,
+            label:    phase.label,
+            duration: phase.duration
+          };
         }
         t -= phase.duration;
       }
-      return { y: 1, label: '', duration: 0 }; 
+      return { y: 1, label: '', duration: 0 };
     }
 
+    /**
+     * Calculates how many seconds remain until the current exhale phase ends,
+     * used to let the session finish gracefully on the current breath.
+     */
     function getExhaleRemainingSeconds(nowSec, patternId) {
-      const t = nowSec % patternDurations[patternId];
-      let accumulatedTime = 0, exhaleEndTime = 0;
-      for (let phase of patternDefs[patternId]) {
-        accumulatedTime += phase.duration;
-        if (phase.label.includes('Exhale')) exhaleEndTime = accumulatedTime;
+      const t = nowSec % PATTERN_DURATIONS[patternId];
+      let accumulated = 0, exhaleEnd = 0;
+      for (const phase of PATTERN_DEFS[patternId]) {
+        accumulated += phase.duration;
+        if (phase.label.includes('Exhale')) exhaleEnd = accumulated;
       }
-      return Math.max(0, exhaleEndTime - t);
+      return Math.max(0, exhaleEnd - t);
     }
 
+    /** Called on every tick (both rAF and the 200ms interval fallback). */
     function updateLogic() {
       if (!state.isRunning) return;
-      const nowSec = (Date.now() - state.sessionStartTime) / 1000;
-      let currentState = getStateAtTime(nowSec, state.selectedPattern);
-      
-      if (state.isStopping && (currentState.label !== state.currentPhaseLabel) && state.currentPhaseLabel.includes('Exhale')) { 
-        return executeStop(); 
+      const nowSec       = (Date.now() - state.sessionStartTime) / 1000;
+      const currentState = getStateAtTime(nowSec, state.selectedPattern);
+
+      // Graceful stop: wait for the exhale to complete before ending
+      if (state.isStopping && currentState.label !== state.currentPhaseLabel && state.currentPhaseLabel.includes('Exhale')) {
+        return executeStop();
       }
 
+      // Play audio cue on phase transition
       if (currentState.label !== state.currentPhaseLabel) {
         state.currentPhaseLabel = currentState.label;
         playTone(state.currentPhaseLabel, currentState.duration);
       }
 
-      const currentCycleIndex = Math.floor(nowSec / patternDurations[state.selectedPattern]);
-      let remainingMs = state.targetEndTimeMs - Date.now();
+      const currentCycleIndex = Math.floor(nowSec / PATTERN_DURATIONS[state.selectedPattern]);
+      let remainingMs         = state.targetEndTimeMs - Date.now();
 
       if (state.selectedPattern === 'sigh') {
-        if (currentCycleIndex > state.lastCycleIndex) { 
-          state.sighCyclesCompleted++; 
-          state.lastCycleIndex = currentCycleIndex; 
+        if (currentCycleIndex > state.lastCycleIndex) {
+          state.sighCyclesCompleted++;
+          state.lastCycleIndex = currentCycleIndex;
           saveSessionState();
         }
         if (state.sighCyclesCompleted >= 3 && !state.isStopping) return executeStop();
       } else {
         if (state.isStopping) {
-          DOM.subTimeBtn.disabled = true; DOM.addTimeBtn.disabled = true;
+          DOM.subTimeBtn.disabled = true;
+          DOM.addTimeBtn.disabled = true;
         } else {
-          DOM.subTimeBtn.disabled = remainingMs < (5 * 60 * 1000);
+          DOM.subTimeBtn.disabled = remainingMs < (5  * 60 * 1000);
           DOM.addTimeBtn.disabled = remainingMs > (55 * 60 * 1000);
         }
 
         if (remainingMs <= 0 && !state.isStopping) {
-          state.isStopping = true;
+          state.isStopping      = true;
           state.targetEndTimeMs = Date.now() + (getExhaleRemainingSeconds(nowSec, state.selectedPattern) * 1000);
-          DOM.stopBtn.innerText = 'Finishing exhale...';
-          DOM.stopBtn.style.background = '#F4A261'; 
+          // FIX: consistent label with the manual stop handler
+          DOM.stopBtn.innerText        = 'Finishing exhale...';
+          DOM.stopBtn.style.background = '#F4A261';
           saveSessionState();
         }
         remainingMs = state.targetEndTimeMs - Date.now();
       }
+
       DOM.timerDisplay.innerText = formatTime(Math.max(0, Math.ceil(remainingMs / 1000)));
     }
 
+    /** Main render loop — draws the breath curve and the animated ball. */
     function animate() {
       if (!state.isRunning) return;
-      updateLogic(); 
-      const nowSec = (Date.now() - state.sessionStartTime) / 1000;
-      let currentState = getStateAtTime(nowSec, state.selectedPattern);
-      const ctx = DOM.ctx, width = DOM.canvas.width, height = DOM.canvas.height;
+      updateLogic();
+
+      const nowSec       = (Date.now() - state.sessionStartTime) / 1000;
+      const currentState = getStateAtTime(nowSec, state.selectedPattern);
+      const ctx          = DOM.ctx;
+      const width        = DOM.canvas.width;
+      const height       = DOM.canvas.height;
 
       ctx.clearRect(0, 0, width, height);
-      const ballX = width / 2;
-      const paddingY = height * 0.2; 
-      const pathHeight = height - (paddingY * 2);
 
-      const visibleSeconds = 16; 
-      const timeScale = visibleSeconds / width;
+      const ballX        = width / 2;
+      const paddingY     = height * 0.2;
+      const pathHeight   = height - paddingY * 2;
+      const visibleSecs  = 16;
+      const timeScale    = visibleSecs / width;
 
-      ctx.beginPath(); ctx.strokeStyle = 'rgba(255, 255, 255)'; ctx.lineWidth = 4;
+      // Draw breath curve
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
+      ctx.lineWidth   = 4;
       for (let x = 0; x < width; x++) {
-        let pixelTimeSec = nowSec + (x - ballX) * timeScale; 
-        if (pixelTimeSec < 0) continue; 
-        let yState = getStateAtTime(pixelTimeSec, state.selectedPattern);
-        let screenY = paddingY + (yState.y * pathHeight);
-        (x === 0) ? ctx.moveTo(x, screenY) : ctx.lineTo(x, screenY);
+        const pixelTimeSec = nowSec + (x - ballX) * timeScale;
+        if (pixelTimeSec < 0) continue;
+        const yState  = getStateAtTime(pixelTimeSec, state.selectedPattern);
+        const screenY = paddingY + yState.y * pathHeight;
+        x === 0 ? ctx.moveTo(x, screenY) : ctx.lineTo(x, screenY);
       }
       ctx.stroke();
 
-      let ballY = paddingY + (currentState.y * pathHeight);
-      ctx.shadowBlur = 20; ctx.shadowColor = 'white';
-      ctx.beginPath(); ctx.fillStyle = 'white'; ctx.arc(ballX, ballY, 15, 0, Math.PI * 2); ctx.fill();
-      
-      const fontSize = Math.min(40, width * 0.08); 
-      ctx.shadowBlur = 0; 
-      ctx.font = `bold ${fontSize}px Segoe UI, sans-serif`; 
-      ctx.fillStyle = 'white'; 
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.shadowColor = 'rgba(0,0,0,0.5)'; 
-      ctx.shadowBlur = 10;
-      
-      let textY;
-      if (window.innerWidth <= 768) {
-        // Mobile: Render below the path and ensure it doesn't overlap the End Session button
-        textY = Math.min(height - paddingY + (paddingY / 2) -30, height - 90);
-      } else {
-        // Desktop: Render above the path
-        textY = paddingY / 2;
-      }
-      
+      // Draw animated ball
+      const ballY = paddingY + currentState.y * pathHeight;
+      ctx.shadowBlur  = 20;
+      ctx.shadowColor = 'white';
+      ctx.beginPath();
+      ctx.fillStyle = 'white';
+      ctx.arc(ballX, ballY, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw phase label
+      const fontSize = Math.min(40, width * 0.08);
+      ctx.shadowBlur      = 0;
+      ctx.font            = `bold ${fontSize}px Segoe UI, sans-serif`;
+      ctx.fillStyle       = 'white';
+      ctx.textAlign       = 'center';
+      ctx.textBaseline    = 'middle';
+      ctx.shadowColor     = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur      = 10;
+
+      const textY = (window.innerWidth <= 768)
+        ? Math.min(height - paddingY + paddingY / 2 - 30, height - 90)  // below path on mobile
+        : paddingY / 2;                                                   // above path on desktop
+
       ctx.fillText(currentState.label, ballX, textY);
-      
+
       animationFrameId = requestAnimationFrame(animate);
     }
 
-    function formatTime(s) { 
+    function formatTime(s) {
       return `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
     }
 
-    /* 6. SESSION CONTROL */
+    /* ── 9. SESSION CONTROL ───────────────────────────────────────── */
+
     function initAudio() {
       if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
     }
 
+    /** Resumes a session that was interrupted by a page reload. */
     function resumeSession() {
       initAudio();
-      
-      const patternNames = { box: 'Box Breathing', paced: 'Paced Breathing', sigh: 'Physiological Sigh', nostril: 'Alternate Nostril' };
-      DOM.patternDisplay.innerText = patternNames[state.selectedPattern];
+
+      DOM.patternDisplay.innerText    = PATTERN_NAMES[state.selectedPattern];
       DOM.patternDisplay.style.display = 'block';
-      
-      DOM.mainUi.style.opacity = '0'; DOM.mainUi.style.pointerEvents = 'none'; 
-      DOM.canvas.style.opacity = '1';
-      
-      DOM.stopBtn.style.display = 'block'; 
-      if(state.isStopping) {
-        DOM.stopBtn.innerText = 'Finishing cycle...';
+
+      DOM.mainUi.style.opacity        = '0';
+      DOM.mainUi.style.pointerEvents  = 'none';
+      DOM.canvas.style.opacity        = '1';
+
+      DOM.stopBtn.style.display = 'block';
+      // FIX: consistent label — matches the mid-session stop handler
+      if (state.isStopping) {
+        DOM.stopBtn.innerText        = 'Finishing exhale...';
         DOM.stopBtn.style.background = '#F4A261';
       } else {
-        DOM.stopBtn.innerText = 'End Session'; 
-        DOM.stopBtn.style.background = '#D4E6F1'; 
+        DOM.stopBtn.innerText        = 'End Session';
+        DOM.stopBtn.style.background = '#D4E6F1';
       }
 
       animate();
@@ -801,69 +1063,87 @@
       backgroundTimerId = setInterval(updateLogic, 200);
     }
 
+    /** Starts a fresh session. Pass durationMinsOverride to bypass the dropdown. */
     function startSession(durationMinsOverride = null) {
       initAudio();
-      
-      const patternNames = { box: 'Box Breathing', paced: 'Paced Breathing', sigh: 'Physiological Sigh', nostril: 'Alternate Nostril' };
-      DOM.patternDisplay.innerText = patternNames[state.selectedPattern];
+
+      DOM.patternDisplay.innerText     = PATTERN_NAMES[state.selectedPattern];
       DOM.patternDisplay.style.display = 'block';
-      
-      state.currentPhaseLabel = ''; state.isStopping = false; 
-      state.sessionStartTime = Date.now();
-      
+
+      state.currentPhaseLabel  = '';
+      state.isStopping         = false;
+      state.sessionStartTime   = Date.now();
+
       if (state.selectedPattern === 'sigh') {
-        state.sighCyclesCompleted = 0; state.lastCycleIndex = 0;
-        state.targetEndTimeMs = state.sessionStartTime + (49.5 * 1000);
-        DOM.addTimeBtn.disabled = true; DOM.subTimeBtn.disabled = true;
+        state.sighCyclesCompleted = 0;
+        state.lastCycleIndex      = 0;
+        state.targetEndTimeMs     = state.sessionStartTime + (49.5 * 1000);
+        DOM.addTimeBtn.disabled   = true;
+        DOM.subTimeBtn.disabled   = true;
       } else {
-        const mins = durationMinsOverride !== null ? durationMinsOverride : parseInt(DOM.durationSelect.value, 10);
-        state.targetEndTimeMs = state.sessionStartTime + (mins * 60 * 1000);
-        DOM.addTimeBtn.disabled = false; DOM.subTimeBtn.disabled = false;
+        const mins              = durationMinsOverride !== null
+                                    ? durationMinsOverride
+                                    : parseInt(DOM.durationSelect.value, 10);
+        state.targetEndTimeMs   = state.sessionStartTime + (mins * 60 * 1000);
+        DOM.addTimeBtn.disabled = false;
+        DOM.subTimeBtn.disabled = false;
       }
 
-      DOM.mainUi.style.opacity = '0'; DOM.mainUi.style.pointerEvents = 'none'; 
-      DOM.canvas.style.opacity = '1';
-      
-      DOM.stopBtn.style.display = 'block'; 
-      DOM.stopBtn.innerText = 'End Session'; 
-      DOM.stopBtn.style.background = '#D4E6F1'; 
-      
+      DOM.mainUi.style.opacity       = '0';
+      DOM.mainUi.style.pointerEvents = 'none';
+      DOM.canvas.style.opacity       = '1';
+
+      DOM.stopBtn.style.display = 'block';
+      DOM.stopBtn.innerText        = 'End Session';
+      DOM.stopBtn.style.background = '#D4E6F1';
+
       state.isRunning = true;
       saveSessionState();
-      
+
       animate();
       clearInterval(backgroundTimerId);
       backgroundTimerId = setInterval(updateLogic, 200);
     }
 
+    /** Immediately halts the session and returns to the home screen. */
     function executeStop() {
-      state.isRunning = false;
+      state.isRunning  = false;
       state.isStopping = false;
+
       cancelAnimationFrame(animationFrameId);
       clearInterval(backgroundTimerId);
-      
+
       if (currentOscillator) { try { currentOscillator.stop(); } catch(e) {} }
-      
-      DOM.canvas.style.opacity = '0';
-      DOM.stopBtn.style.display = 'none';
+
+      DOM.canvas.style.opacity         = '0';
+      DOM.stopBtn.style.display        = 'none';
       DOM.patternDisplay.style.display = 'none';
-      
-      DOM.mainUi.style.opacity = '1'; DOM.mainUi.style.pointerEvents = 'auto';
-      
+
+      DOM.mainUi.style.opacity       = '1';
+      DOM.mainUi.style.pointerEvents = 'auto';
+
       localStorage.removeItem('breathwork_active_session');
       updateIdleTimerDisplay();
     }
 
+    /* ── 10. EVENT LISTENERS ──────────────────────────────────────── */
+
     DOM.beginBtn.addEventListener('click', () => startSession());
+
     DOM.stopBtn.addEventListener('click', () => {
-      if (state.isStopping) executeStop();
-      else if (state.currentPhaseLabel.includes('Hold')) executeStop(); 
-      else {
-        state.isStopping = true;
-        const nowSec = (Date.now() - state.sessionStartTime) / 1000;
+      if (state.isStopping) {
+        // Second tap while finishing — end immediately
+        executeStop();
+      } else if (state.currentPhaseLabel.includes('Hold')) {
+        // Stopping during a hold is fine to end right away
+        executeStop();
+      } else {
+        // Begin graceful stop: let the current exhale finish
+        state.isStopping      = true;
+        const nowSec          = (Date.now() - state.sessionStartTime) / 1000;
         state.targetEndTimeMs = Date.now() + (getExhaleRemainingSeconds(nowSec, state.selectedPattern) * 1000);
-        DOM.stopBtn.innerText = 'Finishing exhale... (Click again to end)';
-        DOM.stopBtn.style.background = '#F4A261'; 
+        DOM.stopBtn.innerText        = 'Finishing exhale... (tap again to end now)';
+        DOM.stopBtn.style.background = '#F4A261';
         saveSessionState();
       }
     });
