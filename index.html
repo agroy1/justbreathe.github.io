@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Just Breathe</title>
   <style>
     /* ── Theme Variables ──────────────────────────────────────────── */
@@ -57,7 +58,7 @@
     }
     .btn-base:hover {
       background: #fff;
-      color: #333; /* ensures readability on pure white hover */
+      color: #333; 
       transform: scale(1.05);
     }
 
@@ -77,7 +78,8 @@
       font-size: 1.2rem;
       user-select: none;
       z-index: 30;
-      white-space: nowrap;
+      white-space: normal; /* Allowed to wrap on small screens */
+      line-height: 1.2;
       max-width: 85vw;
       text-align: center;
     }
@@ -391,16 +393,19 @@
     }
 
     @media (max-width: 480px) {
-      #timer-container { top: 10px; left: 10px; padding: 10px 12px; max-width: 45%; box-sizing: border-box; }
-      #timer-display   { font-size: 1.6rem; }
+      /* Shrink container & padding to prevent overlap with drawing */
+      #timer-container { top: 10px; left: 10px; padding: 8px 10px; max-width: 55%; box-sizing: border-box; gap: 6px; }
+      #timer-display   { font-size: 1.4rem; }
       #menu-btn        { top: 10px; right: 10px; padding: 8px 15px; font-size: 0.9rem; }
-      .action-btn      { padding: 12px 30px; font-size: 1rem; bottom: max(20px, env(safe-area-inset-bottom)); }
+      
+      /* Adjust Action Button for smaller text wrapping safely */
+      .action-btn      { padding: 10px 20px; font-size: 1.05rem; bottom: max(20px, env(safe-area-inset-bottom)); }
       #close-menu-btn  { top: 10px; right: 20px; font-size: 2rem; }
       #pattern-display {
         top: 10px; right: 10px;
         font-size: 0.9rem;
         padding: 8px 12px;
-        max-width: 48%;
+        max-width: 45%;
         box-sizing: border-box;
         white-space: normal;
         line-height: 1.2;
@@ -422,12 +427,15 @@
       }
       .content-area { padding: 15px; padding-bottom: 80px; }
       .tab-btn { white-space: normal; padding: 10px; font-size: 0.95rem; }
-      .action-btn { bottom: 15px; padding: 10px 25px; font-size: 1rem; }
+      .action-btn { bottom: 15px; padding: 10px 20px; font-size: 1rem; }
       #close-menu-btn { top: 10px; right: 15px; font-size: 2rem; }
+      #timer-container { top: 10px; left: 10px; padding: 8px 10px; }
     }
   </style>
 </head>
 <body>
+
+  <audio id="ios-audio-keeper" loop playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
 
   <div id="app-container" onclick="unlockAudio()">
     <canvas id="breathCanvas"></canvas>
@@ -670,7 +678,8 @@
       durationControls:    document.getElementById('duration-controls'),
       sighText:            document.getElementById('sigh-text'),
       muteToggle:          document.getElementById('mute-toggle'),
-      muteToggleWrapper:   document.getElementById('mute-toggle-wrapper')
+      muteToggleWrapper:   document.getElementById('mute-toggle-wrapper'),
+      iosAudioKeeper:      document.getElementById('ios-audio-keeper')
     };
 
     /* ── 3. STATE ─────────────────────────────────────────────────── */
@@ -689,7 +698,7 @@
     };
 
     let animationFrameId, backgroundTimerId, currentOscillator = null;
-    let silenceOscillator = null, silenceGain = null; // Used for keeping background context alive
+    let silenceOscillator = null, silenceGain = null; 
     window.audioCtx = null;
 
     /* ── 4. PERSISTENCE ───────────────────────────────────────────── */
@@ -765,18 +774,23 @@
 
     /* ── 5. AUDIO & HAPTICS ───────────────────────────────────────── */
 
-    // Keeps WebAudio alive in the background (especially on mobile)
+    // Keeps WebAudio alive in the background on mobile devices
     function manageSilentBackgroundAudio(start) {
-      if (!window.audioCtx) return;
       if (start) {
+        // Trigger the invisible native audio element loop for strong background persistence
+        DOM.iosAudioKeeper.play().catch(() => {});
+        
+        // Also maintain the Web Audio API context
+        if (!window.audioCtx) return;
         if (silenceOscillator) return;
         silenceOscillator = window.audioCtx.createOscillator();
         silenceGain = window.audioCtx.createGain();
-        silenceGain.gain.value = 0; // completely silent
+        silenceGain.gain.value = 0.001; // nearly silent, prevents aggressive auto-suspend
         silenceOscillator.connect(silenceGain);
         silenceGain.connect(window.audioCtx.destination);
         silenceOscillator.start();
       } else {
+        DOM.iosAudioKeeper.pause();
         if (silenceOscillator) {
           try { silenceOscillator.stop(); silenceOscillator.disconnect(); silenceGain.disconnect(); } catch(e){}
           silenceOscillator = null;
@@ -828,7 +842,6 @@
         pattern.push(pulse, pause);
       }
       
-      // Attempt to respect array length limits safely
       if(pattern.length > 120) pattern.length = 120;
       navigator.vibrate(pattern);
     }
@@ -861,7 +874,7 @@
       executeStop();
     });
 
-   DOM.muteToggle.addEventListener('change', () => {
+    DOM.muteToggle.addEventListener('change', () => {
       state.isMuted = DOM.muteToggle.checked;
       saveSettings();
       
@@ -870,17 +883,14 @@
           try { currentOscillator.stop(); } catch(e){}
         }
       } else if (!state.isMuted && state.isRunning) {
-        // Calculate current position in the session to resume audio instantly
         const nowSec = (Date.now() - state.sessionStartTime) / 1000;
         const currentState = getStateAtTime(nowSec, state.selectedPattern);
         
-        // Only resume if the current phase actually has a tone (not a 'Hold')
         if (!currentState.label.includes('Hold')) {
           const tInCycle = nowSec % PATTERN_DURATIONS[state.selectedPattern];
           let accumulated = 0;
           let remainingDuration = 0;
           
-          // Find the exact phase we are in and calculate the remaining seconds
           for (const phase of PATTERN_DEFS[state.selectedPattern]) {
             accumulated += phase.duration;
             if (tInCycle < accumulated) {
@@ -889,7 +899,6 @@
             }
           }
           
-          // Play the tone strictly for the remainder of the current phase
           if (remainingDuration > 0) {
             playTone(currentState.label, remainingDuration);
           }
@@ -1107,7 +1116,7 @@
         if (remainingMs <= 0 && !state.isStopping) {
           state.isStopping      = true;
           state.targetEndTimeMs = Date.now() + (getExhaleRemainingSeconds(nowSec, state.selectedPattern) * 1000);
-          DOM.stopBtn.innerText        = 'Finishing exhale...';
+          DOM.stopBtn.innerText        = 'Finishing exhale... (Tap to end)';
           DOM.stopBtn.style.background = '#F4A261';
           saveSessionState();
         }
@@ -1130,7 +1139,9 @@
       ctx.clearRect(0, 0, width, height);
 
       const ballX        = width / 2;
-      const paddingY     = height * 0.2;
+      
+      // Increased padding Y to ensure wave doesn't overlap top/bottom widgets on small screens
+      const paddingY     = Math.max(height * 0.22, 110);
       const pathHeight   = height - paddingY * 2;
       const visibleSecs  = 16;
       const timeScale    = visibleSecs / width;
@@ -1163,10 +1174,18 @@
       ctx.textBaseline    = 'middle';
       ctx.shadowColor     = 'rgba(0,0,0,0.5)';
       ctx.shadowBlur      = 10;
-
-      const textY = (window.innerWidth <= 768)
-        ? Math.min(height - paddingY + paddingY / 2 - 30, height - 90)  
-        : paddingY / 2;                                                   
+      
+      let textY;
+      if (window.innerWidth <= 768 && window.innerHeight > 500) {
+        // Portrait mobile: safely placed right above the bottom button threshold
+        textY = height - Math.max(paddingY * 0.7, 90);
+      } else if (window.innerHeight <= 500) {
+        // Landscape mobile: securely tucked into the top-center gap, above the path
+        textY = 55; // Lower number = higher on the screen. Adjust if needed (previously hit a min of 85)
+      } else {
+        // Desktop: dynamic placement based on padding
+        textY = Math.max(paddingY / 2, 85); 
+      }
 
       ctx.fillText(currentState.label, ballX, textY);
 
@@ -1198,7 +1217,7 @@
 
       DOM.stopBtn.style.display = 'block';
       if (state.isStopping) {
-        DOM.stopBtn.innerText        = 'Finishing exhale...';
+        DOM.stopBtn.innerText        = 'Finishing exhale... (Tap to end)';
         DOM.stopBtn.style.background = '#F4A261';
       } else {
         DOM.stopBtn.innerText        = 'End Session';
@@ -1289,7 +1308,7 @@
         state.isStopping      = true;
         const nowSec          = (Date.now() - state.sessionStartTime) / 1000;
         state.targetEndTimeMs = Date.now() + (getExhaleRemainingSeconds(nowSec, state.selectedPattern) * 1000);
-        DOM.stopBtn.innerText        = 'Finishing exhale... (tap again to end now)';
+        DOM.stopBtn.innerText        = 'Finishing exhale... (Tap to end)';
         DOM.stopBtn.style.background = '#F4A261';
         saveSessionState();
       }
