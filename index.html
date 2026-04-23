@@ -434,8 +434,8 @@
   </style>
 </head>
 <body>
-
-  <audio id="ios-audio-keeper" loop playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
+  
+  <audio id="ios-audio-keeper" loop playsinline></audio>
 
   <div id="app-container" onclick="unlockAudio()">
     <canvas id="breathCanvas"></canvas>
@@ -777,22 +777,48 @@
     // Keeps WebAudio alive in the background on mobile devices
     function manageSilentBackgroundAudio(start) {
       if (start) {
-        // Trigger the invisible native audio element loop for strong background persistence
-        DOM.iosAudioKeeper.play().catch(() => {});
-        
-        // Also maintain the Web Audio API context
         if (!window.audioCtx) return;
-        if (silenceOscillator) return;
-        silenceOscillator = window.audioCtx.createOscillator();
-        silenceGain = window.audioCtx.createGain();
-        silenceGain.gain.value = 0.001; // nearly silent, prevents aggressive auto-suspend
-        silenceOscillator.connect(silenceGain);
-        silenceGain.connect(window.audioCtx.destination);
-        silenceOscillator.start();
+        
+        if (!silenceOscillator) {
+          silenceOscillator = window.audioCtx.createOscillator();
+          silenceGain = window.audioCtx.createGain();
+          
+          // Use a tiny, imperceptible volume. Mathematical zero (0) can cause 
+          // aggressive iOS versions to flag it as empty and suspend anyway.
+          silenceGain.gain.value = 0.001; 
+          
+          silenceOscillator.connect(silenceGain);
+          silenceGain.connect(window.audioCtx.destination);
+          
+          // CRITICAL FIX: Route the oscillator into a MediaStream and feed it into 
+          // the HTML5 audio element. Safari recognizes this as an active broadcast,
+          // keeping the Javascript engine and timers alive in the background.
+          const streamDest = window.audioCtx.createMediaStreamDestination();
+          silenceGain.connect(streamDest);
+          DOM.iosAudioKeeper.srcObject = streamDest.stream;
+          
+          silenceOscillator.start();
+        }
+        
+        DOM.iosAudioKeeper.play().catch(() => {});
+
+        // UX Bonus: Populate the iOS lock screen media player so it doesn't say "Unknown"
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: 'Breathing Session',
+            artist: 'Just Breathe',
+            album: PATTERN_NAMES[state.selectedPattern] || 'Breathwork'
+          });
+        }
+        
       } else {
         DOM.iosAudioKeeper.pause();
         if (silenceOscillator) {
-          try { silenceOscillator.stop(); silenceOscillator.disconnect(); silenceGain.disconnect(); } catch(e){}
+          try { 
+            silenceOscillator.stop(); 
+            silenceOscillator.disconnect(); 
+            silenceGain.disconnect(); 
+          } catch(e) {}
           silenceOscillator = null;
         }
       }
