@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Just Breathe</title>
   <style>
+    /* ── Theme Variables ──────────────────────────────────────────── */
+    :root {
+      --primary-color: #D4E6F1;
+      --primary-text: #333;
+      --overlay-color: #ffdc82;
+      --overlay-text: black;
+    }
+
     /* ── Reset & Base ─────────────────────────────────────────────── */
     body, html {
       margin: 0;
@@ -38,17 +46,18 @@
     /* ── Shared Buttons ───────────────────────────────────────────── */
     .btn-base {
       padding: 10px 20px;
-      background: #D4E6F1;
+      background: var(--primary-color);
       border: none;
       border-radius: 30px;
       font-weight: bold;
-      color: #333;
+      color: var(--primary-text);
       cursor: pointer;
       box-shadow: 0 4px 15px rgba(0,0,0,0.25);
-      transition: transform 0.2s, background 0.2s; /* FIX: was 'scale', now 'transform' */
+      transition: transform 0.2s, background 0.2s; 
     }
     .btn-base:hover {
       background: #fff;
+      color: #333; /* ensures readability on pure white hover */
       transform: scale(1.05);
     }
 
@@ -72,7 +81,7 @@
       max-width: 85vw;
       text-align: center;
     }
-    /* Override hover scale for action-btn since translateX is already applied */
+    
     .action-btn:hover {
       transform: translateX(-50%) scale(1.05);
     }
@@ -93,11 +102,11 @@
     }
 
     .resume-modal {
-      background: #ffdc82;
+      background: var(--overlay-color);
       padding: 30px 40px;
       border-radius: 16px;
       text-align: center;
-      color: black;
+      color: var(--overlay-text);
       box-shadow: 0 10px 40px rgba(0,0,0,0.3);
       display: flex;
       flex-direction: column;
@@ -107,8 +116,8 @@
       border: 1px solid rgba(0,0,0,0.1);
     }
 
-    .resume-modal h2 { margin: 0; font-size: 1.4rem; color: black; }
-    .resume-modal p  { margin: 0 0 10px 0; opacity: 0.9; font-size: 1rem; line-height: 1.4; color: black; }
+    .resume-modal h2 { margin: 0; font-size: 1.4rem; color: var(--overlay-text); }
+    .resume-modal p  { margin: 0 0 10px 0; opacity: 0.9; font-size: 1rem; line-height: 1.4; color: var(--overlay-text); }
 
     .resume-buttons { display: flex; flex-direction: column; gap: 12px; }
 
@@ -125,23 +134,23 @@
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: #ffdc82;
+      background: var(--overlay-color);
       z-index: 100;
       display: none;
-      color: black;
+      color: var(--overlay-text);
     }
 
     #close-menu-btn {
       position: absolute;
       top: 20px; right: 30px;
       font-size: 2.5rem;
-      color: black;
+      color: var(--overlay-text);
       cursor: pointer;
       user-select: none;
-      transition: color 0.2s;
+      transition: opacity 0.2s;
       z-index: 110;
     }
-    #close-menu-btn:hover { color: #555; }
+    #close-menu-btn:hover { opacity: 0.6; }
 
     .menu-layout {
       display: flex;
@@ -171,13 +180,13 @@
       cursor: pointer;
       font-size: 1.2rem;
       font-weight: bold;
-      color: black;
+      color: var(--overlay-text);
       text-align: left;
       border-radius: 8px;
       transition: all 0.2s;
     }
-    .tab-btn:hover  { background: rgba(0,0,0,0.05); color: black; }
-    .tab-btn.active { background: #D4E6F1; color: black; }
+    .tab-btn:hover  { background: rgba(0,0,0,0.05); }
+    .tab-btn.active { background: var(--primary-color); color: var(--primary-text); }
 
     /* ── Content Area ─────────────────────────────────────────────── */
     .content-area {
@@ -190,14 +199,14 @@
     .tab-content        { display: none; }
     .tab-content.active { display: block; }
 
-    /* ── About Tab ────────────────────────────────────────────────── */
-    .about-header  { margin-top: 0; margin-bottom: 15px; color: black; }
-    .about-text    { line-height: 1.6; color: black; margin-bottom: 30px; font-size: 1.05rem; }
-    .pattern-title { color: black; font-size: 1.1rem; font-weight: bold; }
-    .pattern-desc  { margin: 8px 0 15px 20px; color: black; font-size: 0.95rem; line-height: 1.5; }
+    /* ── Typography & Elements ────────────────────────────────────── */
+    .about-header  { margin-top: 0; margin-bottom: 15px; color: var(--overlay-text); }
+    .about-text    { line-height: 1.6; color: var(--overlay-text); margin-bottom: 30px; font-size: 1.05rem; }
+    .pattern-title { color: var(--overlay-text); font-size: 1.1rem; font-weight: bold; }
+    .pattern-desc  { margin: 8px 0 15px 20px; color: var(--overlay-text); font-size: 0.95rem; line-height: 1.5; }
 
-    /* ── Background Grid ──────────────────────────────────────────── */
-    #bg-grid {
+    /* ── Grids (Backgrounds & Themes) ─────────────────────────────── */
+    .grid-layout {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 25px;
@@ -217,19 +226,26 @@
     .bg-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.1); }
     .bg-card img   { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; background: #444; }
 
+    /* For Themes Tab specifically */
+    .theme-preview {
+      width: 100%; height: 80px; border-radius: 8px; 
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 1.1rem; border: 1px solid rgba(0,0,0,0.1);
+    }
+
     .bg-select-btn {
       width: 100%;
       padding: 10px;
-      border: 1px solid black;
+      border: 1px solid var(--overlay-text);
       border-radius: 6px;
       background: rgba(255,255,255,0.2);
-      color: black;
+      color: var(--overlay-text);
       font-weight: bold;
       cursor: pointer;
       transition: background 0.2s;
     }
     .bg-select-btn:hover    { background: rgba(255,255,255,0.3); }
-    .bg-select-btn.selected { background: #D4E6F1; color: black; }
+    .bg-select-btn.selected { background: var(--primary-color); color: var(--primary-text); border-color: transparent;}
 
     /* ── Pattern List ─────────────────────────────────────────────── */
     .list-item {
@@ -244,12 +260,12 @@
       justify-content: space-between;
       align-items: center;
       font-size: 1.1rem;
-      color: black;
+      color: var(--overlay-text);
       flex-wrap: wrap;
       gap: 10px;
     }
     .list-item:hover    { background: rgba(0,0,0,0.05); }
-    .list-item.selected { background: #D4E6F1; color: black; font-weight: bold; border-color: #D4E6F1; }
+    .list-item.selected { background: var(--primary-color); color: var(--primary-text); font-weight: bold; border-color: var(--primary-color); }
 
     #settings-wrapper  { display: flex; align-items: center; }
     #duration-controls { display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
@@ -309,7 +325,7 @@
     .time-btn:hover:not(:disabled) { background: rgba(255,255,255,0.4); }
     .time-btn:disabled             { opacity: 0.3; cursor: not-allowed; }
 
-    #timer-toggle-wrapper {
+    .toggle-wrapper {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -317,6 +333,11 @@
       font-size: 0.9rem;
       color: #eee;
       margin: 0 auto;
+    }
+
+    #mute-toggle-wrapper {
+      display: none; /* Only show when audio is active */
+      margin-top: 4px;
     }
 
     /* ── Pattern Display ──────────────────────────────────────────── */
@@ -348,7 +369,7 @@
       transition: opacity 1s ease-in;
     }
 
-    /* ── Responsive ───────────────────────────────────────────────── */
+    /* ── Responsive & Fixes ───────────────────────────────────────── */
     @media (max-width: 768px) {
       .menu-layout { flex-direction: column; padding-top: 50px; }
       .sidebar {
@@ -366,7 +387,7 @@
       .about-header   { font-size: 1.3rem; margin-bottom: 15px !important; }
       .about-text, .pattern-desc { font-size: 0.95rem; }
       .list-item      { font-size: 1rem; padding: 12px 15px; }
-      #bg-grid        { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+      .grid-layout    { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
     }
 
     @media (max-width: 480px) {
@@ -387,8 +408,22 @@
       }
     }
 
-    @media (max-height: 600px) {
-      .action-btn { bottom: max(15px, env(safe-area-inset-bottom)); padding: 10px 20px; font-size: 1rem; }
+    /* Fixed Landscape Mobile Distortion */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .menu-layout { flex-direction: row; padding-top: 20px; }
+      .sidebar {
+        width: 200px;
+        border-right: 1px solid rgba(0,0,0,0.1);
+        border-bottom: none;
+        flex-direction: column;
+        overflow-y: auto;
+        padding: 10px;
+        height: 100%;
+      }
+      .content-area { padding: 15px; padding-bottom: 80px; }
+      .tab-btn { white-space: normal; padding: 10px; font-size: 0.95rem; }
+      .action-btn { bottom: 15px; padding: 10px 25px; font-size: 1rem; }
+      #close-menu-btn { top: 10px; right: 15px; font-size: 2rem; }
     }
   </style>
 </head>
@@ -404,9 +439,13 @@
         <button id="sub-time-btn" class="time-btn" disabled>-5 Min</button>
         <button id="add-time-btn" class="time-btn">+5 Min</button>
       </div>
-      <label id="timer-toggle-wrapper">
+      <label class="toggle-wrapper" id="timer-toggle-wrapper">
         <input type="checkbox" id="timer-toggle" checked>
         <span id="timer-toggle-text">Show time</span>
+      </label>
+      <label class="toggle-wrapper" id="mute-toggle-wrapper">
+        <input type="checkbox" id="mute-toggle">
+        <span id="mute-toggle-text">Mute Audio</span>
       </label>
     </div>
 
@@ -418,7 +457,6 @@
     <button id="stop-btn" class="btn-base action-btn">End Session</button>
   </div>
 
-  <!-- Resume modal shown when a saved session is detected on load -->
   <div id="resume-overlay">
     <div class="resume-modal">
       <h2>Session Paused</h2>
@@ -436,19 +474,23 @@
 
       <div class="sidebar">
         <button class="tab-btn active" onclick="switchTab('bg-tab', this)">Backgrounds</button>
+        <button class="tab-btn"        onclick="switchTab('theme-tab', this)">Themes</button>
         <button class="tab-btn"        onclick="switchTab('pattern-tab', this)">Breathing Pattern</button>
         <button class="tab-btn"        onclick="switchTab('about-tab', this)">About</button>
       </div>
 
       <div class="content-area">
 
-        <!-- Backgrounds -->
         <div id="bg-tab" class="tab-content active">
           <h2 class="about-header" style="margin-bottom: 25px;">Select your Background</h2>
-          <div id="bg-grid"></div>
+          <div id="bg-grid" class="grid-layout"></div>
         </div>
 
-        <!-- Pattern selection -->
+        <div id="theme-tab" class="tab-content">
+          <h2 class="about-header" style="margin-bottom: 25px;">Select your Theme</h2>
+          <div id="theme-grid" class="grid-layout"></div>
+        </div>
+
         <div id="pattern-tab" class="tab-content">
           <h2 class="about-header" style="margin-bottom: 25px;">Select a Breathing Pattern</h2>
 
@@ -480,7 +522,6 @@
           </div>
         </div>
 
-        <!-- About -->
         <div id="about-tab" class="tab-content">
           <h2 class="about-header">Why Breathwork Matters</h2>
           <p class="about-text">
@@ -522,8 +563,9 @@
           <div>
             <span class="pattern-title">Alternate Nostril</span>
             <p class="pattern-desc">
-              <strong>Pattern:</strong> Inhale Left (10s) • Hold (6s) • Exhale Right (13s) • Inhale Right (10s) • Hold (6s) • Exhale Left (13s)<br>
-              <strong>Best for:</strong> Balancing energy and centering the mind. Traditionally used in yoga to harmonize the left and right hemispheres of the brain.
+              <strong>Pattern:</strong> Inhale Left (4s) • Hold (4s) • Exhale Right (4s) • Hold (4s)<br>
+              <strong>Best for:</strong> Balancing energy and centering the mind. Traditionally used in yoga
+              to harmonize the left and right hemispheres of the brain.
             </p>
           </div>
 
@@ -541,7 +583,6 @@
   </div>
 
   <script>
-  // Tap anywhere to un-suspend the AudioContext on iOS / strict autoplay browsers
   function unlockAudio() {
     if (window.audioCtx && window.audioCtx.state === 'suspended') {
       window.audioCtx.resume();
@@ -552,6 +593,15 @@
     /* ── 1. CONFIGURATION ─────────────────────────────────────────── */
     const IMAGE_FILES = ['lake.webp', 'mountains.jpg', 'sky.webp', 'mt_fuji.jpg', 'mt_fuji_with_galaxy.jpg'];
 
+    const THEMES = {
+      default:  { name: 'Morning Dew',    primary: '#D4E6F1', pText: '#333',    overlay: '#ffdc82', oText: 'black' },
+      lavender: { name: 'Lavender Dream', primary: '#E6E6FA', pText: '#2C1A4D', overlay: '#F5F5DC', oText: '#2C1A4D' },
+      matcha:   { name: 'Matcha Matcha',  primary: '#D0F0C0', pText: '#2E4826', overlay: '#FDF5E6', oText: '#2E4826' },
+      rose:     { name: 'Rose Petal',     primary: '#FADADD', pText: '#4A252B', overlay: '#FFF0F5', oText: '#4A252B' },
+      ocean:    { name: 'Ocean Mist',     primary: '#AFEEEE', pText: '#1A4343', overlay: '#E0FFFF', oText: '#1A4343' },
+      peach:    { name: 'Peach Serenity', primary: '#FFDAB9', pText: '#4A2E1B', overlay: '#FFE4E1', oText: '#4A2E1B' }
+    };
+
     const PATTERN_NAMES = {
       box:     'Box Breathing',
       paced:   'Paced Breathing',
@@ -559,7 +609,6 @@
       nostril: 'Alternate Nostril'
     };
 
-    // Each phase: label, duration (s), startY / endY (0 = top/inhale, 1 = bottom/exhale)
     const PATTERN_DEFS = {
       box: [
         { label: 'Inhale',  duration: 4,   startY: 1, endY: 0 },
@@ -581,16 +630,13 @@
         { label: 'Hold',           duration: 2.5, startY: 1,   endY: 1   }
       ],
       nostril: [
-        { label: 'Inhale (Left)', duration: 10, startY: 1, endY: 0 },
-        { label: 'Hold', duration: 6, startY: 0, endY: 0 },
-        { label: 'Exhale (Right)', duration: 13, startY: 0, endY: 1 },
-        { label: 'Inhale (Right)', duration: 10, startY: 1, endY: 0 },
-        { label: 'Hold', duration: 6, startY: 0, endY: 0 },
-        { label: 'Exhale (Left)', duration: 13, startY: 0, endY: 1 }
+        { label: 'Inhale (Left)',  duration: 4, startY: 1, endY: 0 },
+        { label: 'Hold',           duration: 4, startY: 0, endY: 0 },
+        { label: 'Exhale (Right)', duration: 4, startY: 0, endY: 1 },
+        { label: 'Hold',           duration: 4, startY: 1, endY: 1 }
       ]
     };
 
-    // Pre-compute total cycle durations
     const PATTERN_DURATIONS = {};
     for (const key in PATTERN_DEFS) {
       PATTERN_DURATIONS[key] = PATTERN_DEFS[key].reduce((sum, p) => sum + p.duration, 0);
@@ -611,6 +657,7 @@
       stopBtn:             document.getElementById('stop-btn'),
       mainUi:              document.getElementById('main-ui'),
       bgGrid:              document.getElementById('bg-grid'),
+      themeGrid:           document.getElementById('theme-grid'),
       patternDisplay:      document.getElementById('pattern-display'),
       timerDisplay:        document.getElementById('timer-display'),
       timerToggle:         document.getElementById('timer-toggle'),
@@ -621,16 +668,20 @@
       durationSelect:      document.getElementById('duration-select'),
       settingsWrapper:     document.getElementById('settings-wrapper'),
       durationControls:    document.getElementById('duration-controls'),
-      sighText:            document.getElementById('sigh-text')
+      sighText:            document.getElementById('sigh-text'),
+      muteToggle:          document.getElementById('mute-toggle'),
+      muteToggleWrapper:   document.getElementById('mute-toggle-wrapper')
     };
 
     /* ── 3. STATE ─────────────────────────────────────────────────── */
     let state = {
       selectedBackground:  '',
       selectedPattern:     'box',
+      selectedTheme:       'default',
       sessionStartTime:    0,
       isRunning:           false,
       isStopping:          false,
+      isMuted:             false,
       targetEndTimeMs:     0,
       sighCyclesCompleted: 0,
       lastCycleIndex:      0,
@@ -638,21 +689,19 @@
     };
 
     let animationFrameId, backgroundTimerId, currentOscillator = null;
+    let silenceOscillator = null, silenceGain = null; // Used for keeping background context alive
     window.audioCtx = null;
 
     /* ── 4. PERSISTENCE ───────────────────────────────────────────── */
 
-    /** Saves UI preferences (pattern, duration, timer visibility) to localStorage. */
     function saveSettings() {
       localStorage.setItem('breathwork_timer_visible', DOM.timerToggle.checked);
       localStorage.setItem('breathwork_pattern',       state.selectedPattern);
       localStorage.setItem('breathwork_duration',      DOM.durationSelect.value);
+      localStorage.setItem('breathwork_muted',         state.isMuted);
+      localStorage.setItem('breathwork_theme',         state.selectedTheme);
     }
 
-    /**
-     * Saves the full runtime session to localStorage so it can be resumed
-     * after a page reload or app switch.
-     */
     function saveSessionState() {
       const sessionData = {
         isRunning:           state.isRunning,
@@ -661,12 +710,11 @@
         targetEndTimeMs:     state.targetEndTimeMs,
         sighCyclesCompleted: state.sighCyclesCompleted,
         lastCycleIndex:      state.lastCycleIndex,
-        selectedPattern:     state.selectedPattern   // FIX: persisted so resume uses the correct pattern
+        selectedPattern:     state.selectedPattern
       };
       localStorage.setItem('breathwork_active_session', JSON.stringify(sessionData));
     }
 
-    /** Restores UI preferences on startup. */
     function loadSettings() {
       const savedDuration = localStorage.getItem('breathwork_duration');
       if (savedDuration) DOM.durationSelect.value = savedDuration;
@@ -677,6 +725,15 @@
         applyTimerVisibility();
       }
 
+      const isMuted = localStorage.getItem('breathwork_muted');
+      if (isMuted !== null) {
+        state.isMuted = (isMuted === 'true');
+        DOM.muteToggle.checked = state.isMuted;
+      }
+
+      const savedTheme = localStorage.getItem('breathwork_theme');
+      setTheme((savedTheme && THEMES[savedTheme]) ? savedTheme : 'default');
+
       const savedPattern = localStorage.getItem('breathwork_pattern');
       if (savedPattern && PATTERN_DEFS[savedPattern]) {
         const patternEl = document.getElementById(`pattern-${savedPattern}`);
@@ -686,10 +743,6 @@
       }
     }
 
-    /**
-     * On load, checks localStorage for an interrupted session. If found and still
-     * valid (time remaining), shows the Resume modal; otherwise cleans up.
-     */
     function loadActiveSession() {
       const saved = localStorage.getItem('breathwork_active_session');
       if (!saved) return;
@@ -697,15 +750,11 @@
         const data = JSON.parse(saved);
         if (data.isRunning) {
           if (state.selectedPattern !== 'sigh' && data.targetEndTimeMs <= Date.now()) {
-            // Session would have already ended — discard silently
             executeStop();
           } else {
             Object.assign(state, data);
-
-            // Show the remaining time so the display isn't "00:00"
             const remainingMs = state.targetEndTimeMs - Date.now();
             DOM.timerDisplay.innerText = formatTime(Math.max(0, Math.ceil(remainingMs / 1000)));
-
             DOM.resumeOverlay.style.display = 'flex';
           }
         }
@@ -714,11 +763,29 @@
       }
     }
 
-    /* ── 5. AUDIO ─────────────────────────────────────────────────── */
+    /* ── 5. AUDIO & HAPTICS ───────────────────────────────────────── */
 
-    /** Plays a short sine-wave tone for inhale (420 Hz) or exhale (326 Hz) phases. */
-    function playTone(phaseLabel, duration) {
+    // Keeps WebAudio alive in the background (especially on mobile)
+    function manageSilentBackgroundAudio(start) {
       if (!window.audioCtx) return;
+      if (start) {
+        if (silenceOscillator) return;
+        silenceOscillator = window.audioCtx.createOscillator();
+        silenceGain = window.audioCtx.createGain();
+        silenceGain.gain.value = 0; // completely silent
+        silenceOscillator.connect(silenceGain);
+        silenceGain.connect(window.audioCtx.destination);
+        silenceOscillator.start();
+      } else {
+        if (silenceOscillator) {
+          try { silenceOscillator.stop(); silenceOscillator.disconnect(); silenceGain.disconnect(); } catch(e){}
+          silenceOscillator = null;
+        }
+      }
+    }
+
+    function playTone(phaseLabel, durationSec) {
+      if (!window.audioCtx || state.isMuted) return;
       if (currentOscillator) { try { currentOscillator.stop(); } catch(e) {} }
       if (phaseLabel.includes('Hold')) return;
 
@@ -733,20 +800,44 @@
       const freq = phaseLabel.includes('Inhale') ? 420 : 326;
       oscillator.frequency.setValueAtTime(freq, window.audioCtx.currentTime);
 
-      const fadeTime = Math.min(0.5, duration * 0.2);
+      const fadeTime = Math.min(0.5, durationSec * 0.2);
       gainNode.gain.setValueAtTime(0,    window.audioCtx.currentTime);
       gainNode.gain.linearRampToValueAtTime(0.1, window.audioCtx.currentTime + fadeTime);
-      gainNode.gain.linearRampToValueAtTime(0.1, window.audioCtx.currentTime + duration - fadeTime);
-      gainNode.gain.linearRampToValueAtTime(0,   window.audioCtx.currentTime + duration);
+      gainNode.gain.linearRampToValueAtTime(0.1, window.audioCtx.currentTime + durationSec - fadeTime);
+      gainNode.gain.linearRampToValueAtTime(0,   window.audioCtx.currentTime + durationSec);
 
       oscillator.start(window.audioCtx.currentTime);
-      oscillator.stop(window.audioCtx.currentTime + duration);
+      oscillator.stop(window.audioCtx.currentTime + durationSec);
+    }
+
+    function playHaptics(phaseLabel, durationSec) {
+      if (!('vibrate' in navigator)) return;
+      navigator.vibrate(0); 
+      if (phaseLabel.includes('Hold')) return;
+
+      const pattern = [];
+      const isInhale = phaseLabel.includes('Inhale');
+      const stepMs = 200; 
+      const steps = Math.floor((durationSec * 1000) / stepMs);
+
+      for (let i = 0; i < steps; i++) {
+        let p = i / (steps - 1 || 1);
+        let intensity = isInhale ? p : (1 - p); 
+        let pulse = Math.max(5, Math.floor(intensity * 40));
+        let pause = stepMs - pulse;
+        pattern.push(pulse, pause);
+      }
+      
+      // Attempt to respect array length limits safely
+      if(pattern.length > 120) pattern.length = 120;
+      navigator.vibrate(pattern);
     }
 
     /* ── 6. UI & MENU ─────────────────────────────────────────────── */
 
     window.onload = () => {
       populateBackgroundList();
+      populateThemeList();
 
       const savedBg = localStorage.getItem('breathwork_bg');
       setBackground((savedBg && IMAGE_FILES.includes(savedBg)) ? savedBg : (IMAGE_FILES[0] || ''));
@@ -770,13 +861,87 @@
       executeStop();
     });
 
+   DOM.muteToggle.addEventListener('change', () => {
+      state.isMuted = DOM.muteToggle.checked;
+      saveSettings();
+      
+      if (state.isMuted) {
+        if (currentOscillator) {
+          try { currentOscillator.stop(); } catch(e){}
+        }
+      } else if (!state.isMuted && state.isRunning) {
+        // Calculate current position in the session to resume audio instantly
+        const nowSec = (Date.now() - state.sessionStartTime) / 1000;
+        const currentState = getStateAtTime(nowSec, state.selectedPattern);
+        
+        // Only resume if the current phase actually has a tone (not a 'Hold')
+        if (!currentState.label.includes('Hold')) {
+          const tInCycle = nowSec % PATTERN_DURATIONS[state.selectedPattern];
+          let accumulated = 0;
+          let remainingDuration = 0;
+          
+          // Find the exact phase we are in and calculate the remaining seconds
+          for (const phase of PATTERN_DEFS[state.selectedPattern]) {
+            accumulated += phase.duration;
+            if (tInCycle < accumulated) {
+              remainingDuration = accumulated - tInCycle;
+              break;
+            }
+          }
+          
+          // Play the tone strictly for the remainder of the current phase
+          if (remainingDuration > 0) {
+            playTone(currentState.label, remainingDuration);
+          }
+        }
+      }
+    });
+
+    function setTheme(themeKey) {
+      state.selectedTheme = themeKey;
+      const t = THEMES[themeKey];
+      document.documentElement.style.setProperty('--primary-color', t.primary);
+      document.documentElement.style.setProperty('--primary-text', t.pText);
+      document.documentElement.style.setProperty('--overlay-color', t.overlay);
+      document.documentElement.style.setProperty('--overlay-text', t.oText);
+
+      document.querySelectorAll('.theme-select-btn').forEach(btn => {
+        const isMatch = btn.dataset.themekey === themeKey;
+        btn.classList.toggle('selected', isMatch);
+        btn.innerText = isMatch ? 'Selected' : 'Select';
+      });
+      saveSettings();
+    }
+
+    function populateThemeList() {
+      for (const key in THEMES) {
+        const t = THEMES[key];
+        const card  = document.createElement('div');
+        card.className = 'bg-card';
+
+        const preview = document.createElement('div');
+        preview.className = 'theme-preview';
+        preview.style.backgroundColor = t.overlay;
+        preview.style.color = t.oText;
+        preview.innerText = t.name;
+
+        const btn   = document.createElement('button');
+        btn.className = 'bg-select-btn theme-select-btn';
+        btn.dataset.themekey = key;
+        btn.onclick = () => setTheme(key);
+
+        card.append(preview, btn);
+        DOM.themeGrid.appendChild(card);
+      }
+    }
+
     function setBackground(filename) {
       if (!filename) return;
       state.selectedBackground = filename;
       DOM.app.style.backgroundImage = `url('images/${filename}')`;
       localStorage.setItem('breathwork_bg', filename);
 
-      document.querySelectorAll('.bg-select-btn').forEach(btn => {
+      document.querySelectorAll('.bg-select-btn:not(.theme-select-btn)').forEach(btn => {
         const isMatch = btn.dataset.filename === filename;
         btn.classList.toggle('selected', isMatch);
         btn.innerText = isMatch ? 'Selected' : 'Select';
@@ -795,6 +960,7 @@
         const title = document.createElement('div');
         title.innerText      = filename;
         title.style.fontWeight = 'bold';
+        title.style.color    = 'var(--overlay-text)';
 
         const btn   = document.createElement('button');
         btn.className        = 'bg-select-btn';
@@ -820,7 +986,7 @@
       element.appendChild(DOM.settingsWrapper);
 
       const isSigh = (patternId === 'sigh');
-      DOM.durationControls.style.display = isSigh ? 'none'         : 'inline-flex';
+      DOM.durationControls.style.display  = isSigh ? 'none'         : 'inline-flex';
       DOM.sighText.style.display          = isSigh ? 'inline-block' : 'none';
 
       updateIdleTimerDisplay();
@@ -843,7 +1009,6 @@
       const show = DOM.timerToggle.checked;
       DOM.timerDisplay.style.display        = show ? 'block' : 'none';
       DOM.timerAdjustControls.style.display = show ? 'flex'  : 'none';
-      // Label intentionally stays "Show time" regardless of state
     }
 
     DOM.timerToggle.addEventListener('change', () => {
@@ -853,13 +1018,6 @@
 
     /* ── 7. TIME ADJUSTMENT ───────────────────────────────────────── */
 
-    /**
-     * +5 Min button:
-     *   • During a session  → adds 5 minutes to the remaining time.
-     *   • On the home screen (idle) → SHORTCUT: immediately starts a 5-minute session
-     *     with the current pattern. Sigh pattern is excluded (it has a fixed 3-cycle duration).
-     *     This is an intentional quick-launch hack for a fast drop-in breath.
-     */
     DOM.addTimeBtn.addEventListener('click', () => {
       if (!state.isRunning) {
         if (state.selectedPattern !== 'sigh') startSession(5);
@@ -884,7 +1042,6 @@
       DOM.canvas.height = window.innerHeight;
     }
 
-    /** Returns interpolated Y position and phase metadata for a given time offset. */
     function getStateAtTime(timeSec, patternId) {
       const cycle = PATTERN_DEFS[patternId];
       let t = Math.max(0, timeSec) % PATTERN_DURATIONS[patternId];
@@ -903,10 +1060,6 @@
       return { y: 1, label: '', duration: 0 };
     }
 
-    /**
-     * Calculates how many seconds remain until the current exhale phase ends,
-     * used to let the session finish gracefully on the current breath.
-     */
     function getExhaleRemainingSeconds(nowSec, patternId) {
       const t = nowSec % PATTERN_DURATIONS[patternId];
       let accumulated = 0, exhaleEnd = 0;
@@ -917,21 +1070,19 @@
       return Math.max(0, exhaleEnd - t);
     }
 
-    /** Called on every tick (both rAF and the 200ms interval fallback). */
     function updateLogic() {
       if (!state.isRunning) return;
       const nowSec       = (Date.now() - state.sessionStartTime) / 1000;
       const currentState = getStateAtTime(nowSec, state.selectedPattern);
 
-      // Graceful stop: wait for the exhale to complete before ending
       if (state.isStopping && currentState.label !== state.currentPhaseLabel && state.currentPhaseLabel.includes('Exhale')) {
         return executeStop();
       }
 
-      // Play audio cue on phase transition
       if (currentState.label !== state.currentPhaseLabel) {
         state.currentPhaseLabel = currentState.label;
         playTone(state.currentPhaseLabel, currentState.duration);
+        playHaptics(state.currentPhaseLabel, currentState.duration);
       }
 
       const currentCycleIndex = Math.floor(nowSec / PATTERN_DURATIONS[state.selectedPattern]);
@@ -956,7 +1107,6 @@
         if (remainingMs <= 0 && !state.isStopping) {
           state.isStopping      = true;
           state.targetEndTimeMs = Date.now() + (getExhaleRemainingSeconds(nowSec, state.selectedPattern) * 1000);
-          // FIX: consistent label with the manual stop handler
           DOM.stopBtn.innerText        = 'Finishing exhale...';
           DOM.stopBtn.style.background = '#F4A261';
           saveSessionState();
@@ -967,7 +1117,6 @@
       DOM.timerDisplay.innerText = formatTime(Math.max(0, Math.ceil(remainingMs / 1000)));
     }
 
-    /** Main render loop — draws the breath curve and the animated ball. */
     function animate() {
       if (!state.isRunning) return;
       updateLogic();
@@ -986,7 +1135,6 @@
       const visibleSecs  = 16;
       const timeScale    = visibleSecs / width;
 
-      // Draw breath curve
       ctx.beginPath();
       ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
       ctx.lineWidth   = 4;
@@ -999,7 +1147,6 @@
       }
       ctx.stroke();
 
-      // Draw animated ball
       const ballY = paddingY + currentState.y * pathHeight;
       ctx.shadowBlur  = 20;
       ctx.shadowColor = 'white';
@@ -1008,7 +1155,6 @@
       ctx.arc(ballX, ballY, 15, 0, Math.PI * 2);
       ctx.fill();
 
-      // Draw phase label
       const fontSize = Math.min(40, width * 0.08);
       ctx.shadowBlur      = 0;
       ctx.font            = `bold ${fontSize}px Segoe UI, sans-serif`;
@@ -1019,8 +1165,8 @@
       ctx.shadowBlur      = 10;
 
       const textY = (window.innerWidth <= 768)
-        ? Math.min(height - paddingY + paddingY / 2 - 30, height - 90)  // below path on mobile
-        : paddingY / 2;                                                   // above path on desktop
+        ? Math.min(height - paddingY + paddingY / 2 - 30, height - 90)  
+        : paddingY / 2;                                                   
 
       ctx.fillText(currentState.label, ballX, textY);
 
@@ -1038,25 +1184,25 @@
       if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
     }
 
-    /** Resumes a session that was interrupted by a page reload. */
     function resumeSession() {
       initAudio();
+      manageSilentBackgroundAudio(true);
 
-      DOM.patternDisplay.innerText    = PATTERN_NAMES[state.selectedPattern];
+      DOM.patternDisplay.innerText     = PATTERN_NAMES[state.selectedPattern];
       DOM.patternDisplay.style.display = 'block';
+      DOM.muteToggleWrapper.style.display = 'flex';
 
       DOM.mainUi.style.opacity        = '0';
       DOM.mainUi.style.pointerEvents  = 'none';
       DOM.canvas.style.opacity        = '1';
 
       DOM.stopBtn.style.display = 'block';
-      // FIX: consistent label — matches the mid-session stop handler
       if (state.isStopping) {
         DOM.stopBtn.innerText        = 'Finishing exhale...';
         DOM.stopBtn.style.background = '#F4A261';
       } else {
         DOM.stopBtn.innerText        = 'End Session';
-        DOM.stopBtn.style.background = '#D4E6F1';
+        DOM.stopBtn.style.background = 'var(--primary-color)';
       }
 
       animate();
@@ -1064,12 +1210,13 @@
       backgroundTimerId = setInterval(updateLogic, 200);
     }
 
-    /** Starts a fresh session. Pass durationMinsOverride to bypass the dropdown. */
     function startSession(durationMinsOverride = null) {
       initAudio();
+      manageSilentBackgroundAudio(true);
 
       DOM.patternDisplay.innerText     = PATTERN_NAMES[state.selectedPattern];
       DOM.patternDisplay.style.display = 'block';
+      DOM.muteToggleWrapper.style.display = 'flex';
 
       state.currentPhaseLabel  = '';
       state.isStopping         = false;
@@ -1094,9 +1241,9 @@
       DOM.mainUi.style.pointerEvents = 'none';
       DOM.canvas.style.opacity       = '1';
 
-      DOM.stopBtn.style.display = 'block';
+      DOM.stopBtn.style.display    = 'block';
       DOM.stopBtn.innerText        = 'End Session';
-      DOM.stopBtn.style.background = '#D4E6F1';
+      DOM.stopBtn.style.background = 'var(--primary-color)';
 
       state.isRunning = true;
       saveSessionState();
@@ -1106,19 +1253,21 @@
       backgroundTimerId = setInterval(updateLogic, 200);
     }
 
-    /** Immediately halts the session and returns to the home screen. */
     function executeStop() {
       state.isRunning  = false;
       state.isStopping = false;
 
       cancelAnimationFrame(animationFrameId);
       clearInterval(backgroundTimerId);
+      manageSilentBackgroundAudio(false);
 
       if (currentOscillator) { try { currentOscillator.stop(); } catch(e) {} }
+      if ('vibrate' in navigator) navigator.vibrate(0);
 
-      DOM.canvas.style.opacity         = '0';
-      DOM.stopBtn.style.display        = 'none';
-      DOM.patternDisplay.style.display = 'none';
+      DOM.canvas.style.opacity            = '0';
+      DOM.stopBtn.style.display           = 'none';
+      DOM.patternDisplay.style.display    = 'none';
+      DOM.muteToggleWrapper.style.display = 'none';
 
       DOM.mainUi.style.opacity       = '1';
       DOM.mainUi.style.pointerEvents = 'auto';
@@ -1133,13 +1282,10 @@
 
     DOM.stopBtn.addEventListener('click', () => {
       if (state.isStopping) {
-        // Second tap while finishing — end immediately
         executeStop();
       } else if (state.currentPhaseLabel.includes('Hold')) {
-        // Stopping during a hold is fine to end right away
         executeStop();
       } else {
-        // Begin graceful stop: let the current exhale finish
         state.isStopping      = true;
         const nowSec          = (Date.now() - state.sessionStartTime) / 1000;
         state.targetEndTimeMs = Date.now() + (getExhaleRemainingSeconds(nowSec, state.selectedPattern) * 1000);
