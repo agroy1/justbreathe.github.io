@@ -1125,7 +1125,7 @@
 
       DOM.timerDisplay.innerText = formatTime(Math.max(0, Math.ceil(remainingMs / 1000)));
     }
-
+    
     function animate() {
       if (!state.isRunning) return;
       updateLogic();
@@ -1140,8 +1140,13 @@
 
       const ballX        = width / 2;
       
-      // Increased padding Y to ensure wave doesn't overlap top/bottom widgets on small screens
-      const paddingY     = Math.max(height * 0.22, 110);
+      // Dynamically calculate padding. For portrait mobile, force a larger 160px 
+      // gap at the bottom so the wave doesn't run into the text/button area.
+      let paddingY = Math.max(height * 0.22, 110);
+      if (window.innerWidth <= 768 && window.innerHeight > 500) {
+        paddingY = Math.max(height * 0.25, 160); 
+      }
+
       const pathHeight   = height - paddingY * 2;
       const visibleSecs  = 16;
       const timeScale    = visibleSecs / width;
@@ -1174,14 +1179,15 @@
       ctx.textBaseline    = 'middle';
       ctx.shadowColor     = 'rgba(0,0,0,0.5)';
       ctx.shadowBlur      = 10;
-      
+
       let textY;
       if (window.innerWidth <= 768 && window.innerHeight > 500) {
-        // Portrait mobile: safely placed right above the bottom button threshold
-        textY = height - Math.max(paddingY * 0.7, 90);
+        // Portrait mobile: safely placed exactly between the bottom of the 
+        // canvas wave (height - 160) and the top of the taller wrapped stop button
+        textY = height - 125;
       } else if (window.innerHeight <= 500) {
-        // Landscape mobile: securely tucked into the top-center gap, above the path
-        textY = 55; // Lower number = higher on the screen. Adjust if needed (previously hit a min of 85)
+        // Landscape mobile: securely tucked into the top-center gap
+        textY = 55; 
       } else {
         // Desktop: dynamic placement based on padding
         textY = Math.max(paddingY / 2, 85); 
